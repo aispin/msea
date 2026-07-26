@@ -46,7 +46,7 @@ export function createDimensions(): THREE.Group {
   group.add(dimLine([new THREE.Vector3(0, 0.02, -d), new THREE.Vector3(totalX, 0.02, -d)]))
   group.add(dimText(`${totalX.toFixed(2)}m`, new THREE.Vector3(totalX / 2, 0.15, -d)))
 
-  // ─── 各区段长度 (Z轴) — SE侧地面 ─────────────
+  // ─── 各区段长度 (Z轴) — NW侧地面 ─────────────
   const zA = ZONE_OFFSETS.zoneAStart
   const zB = ZONE_OFFSETS.zoneBStart
   const zC = ZONE_OFFSETS.zoneCStart
@@ -54,16 +54,18 @@ export function createDimensions(): THREE.Group {
   const lB = DIMENSIONS.zoneB.length
   const lC = DIMENSIONS.zoneC.length
 
-  const segY = 0.02; const d2 = totalX + d
+  const segY = 0.02; const segX = -d
   const makeSeg = (z0: number, len: number, label: string) => {
-    group.add(dimLine([new THREE.Vector3(d2, segY, z0), new THREE.Vector3(d2, segY, z0 + len)]))
-    group.add(dimText(`${label}: ${len.toFixed(2)}m`, new THREE.Vector3(d2, 0.15, z0 + len / 2), 0.5))
+    group.add(dimLine([new THREE.Vector3(segX, segY, z0), new THREE.Vector3(segX, segY, z0 + len)]))
+    group.add(dimText(`${label}: ${len.toFixed(2)}m`, new THREE.Vector3(segX, 0.15, z0 + len / 2), 0.5))
   }
   makeSeg(zA, lA, 'A区'); makeSeg(zB, lB, 'B区'); makeSeg(zC, lC, 'C区')
 
   // ─── 总高 — NW墙外屋脊处 ──────────────────────
   const hxNW = -0.3
-  const hzRidge = ZONE_OFFSETS.zoneBStart + DIMENSIONS.roof.totalLength / 2
+  const wallAB = ZONE_OFFSETS.zoneBStart - WL / 2
+  const wallNE = ZONE_OFFSETS.zoneBStart + DIMENSIONS.roof.totalLength + WL
+  const hzRidge = (wallAB + wallNE) / 2  // 屋脊Z (精确)
   group.add(dimLine([new THREE.Vector3(hxNW, 0, hzRidge), new THREE.Vector3(hxNW, eaveH, hzRidge)]))
   group.add(dimText(`檐${eaveH.toFixed(2)}m`, new THREE.Vector3(hxNW - 0.2, eaveH / 2, hzRidge)))
   group.add(dimLine([new THREE.Vector3(hxNW, eaveH, hzRidge), new THREE.Vector3(hxNW, ridgeH, hzRidge)]))
@@ -81,23 +83,11 @@ export function createDimensions(): THREE.Group {
   group.add(dimLine([new THREE.Vector3(dcx - iw / 2, ih + 0.1, iz), new THREE.Vector3(dcx + iw / 2, ih + 0.1, iz)]))
   group.add(dimText(`内门${iw.toFixed(2)}×${ih.toFixed(2)}m`, new THREE.Vector3(dcx, ih + 0.3, iz)))
 
-  // ─── 窗户尺寸 — SE立面 ─────────────────────────
+  // ─── 窗户尺寸 — B区窗下方 ───────────────────────
   const winW = DIMENSIONS.window.width; const winH = DIMENSIONS.window.height
-  const wx = totalX + 0.05
-  for (let i = 0; i < 3; i++) {
-    const wz = zB + (i + 0.5) * (lB + lC) / 3 + (i >= 2 ? lA : 0)  // rough spread
-    // approximate window positions matching window builder
-  }
-  // 简化为固定标注
-  group.add(dimText(`窗${winW.toFixed(1)}×${winH.toFixed(1)}m ×3`, new THREE.Vector3(wx, 2.0, zB + (lB + lC) / 2), 0.45))
-
-  // ─── 檐口高 — NW立面 ──────────────────────────
-  group.add(dimLine([new THREE.Vector3(-0.05, eaveH, zB), new THREE.Vector3(0.15, eaveH, zB)]))
-  group.add(dimText(`檐${eaveH.toFixed(2)}m`, new THREE.Vector3(0.2, eaveH, zB), 0.4))
-
-  // ─── 屋脊高 — NW立面 ──────────────────────────
-  group.add(dimLine([new THREE.Vector3(-0.05, ridgeH, zB + DIMENSIONS.roof.totalLength / 2), new THREE.Vector3(0.15, ridgeH, zB + DIMENSIONS.roof.totalLength / 2)]))
-  group.add(dimText(`脊${ridgeH.toFixed(2)}m`, new THREE.Vector3(0.2, ridgeH, zB + DIMENSIONS.roof.totalLength / 2), 0.4))
+  const winBZ = zB + (lB + DIMENSIONS.zoneC.length) / 4  // B区窗Z位置(前半居中)
+  group.add(dimText(`窗${winW.toFixed(1)}×${winH.toFixed(1)}m`, new THREE.Vector3(totalX + 0.05, 0.6, winBZ), 0.45))
+  group.add(dimText(`×3`, new THREE.Vector3(totalX + 0.05, 0.2, zB + (lB + lC) / 2), 0.4))
 
   return group
 }
