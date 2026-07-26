@@ -166,7 +166,7 @@ A、B、C 三个区域沿西南→东北方向**线性排列**，宽度统一为
 | 框架 | React 18 + TypeScript | 后续加家具布置需要组件化状态管理 |
 | 3D 引擎 | Three.js（原生） | 场景适中，原生控制更直接 |
 | 构建工具 | Vite | 轻量快速，适合 demo 迭代 |
-| 样式 | CSS Modules 或 Tailwind | 用于 2D UI 覆盖层（罗盘、提示等） |
+| 样式 | Tailwind CSS | 用于 2D UI 覆盖层（罗盘、提示等） |
 
 ### 6.2 组件树
 
@@ -194,6 +194,13 @@ App
 - 所有尺寸、颜色、位置参数集中在 `config/` 目录下，以常量对象导出。
 - 修改参数后刷新即可看到变化，无需深入业务代码。
 - 材质参数与几何参数分离管理。
+
+### 6.5 部署
+
+- **托管平台**：GitHub Pages
+- **CI/CD**：GitHub Actions，推送 `main` 分支自动构建并部署
+- **构建产物**：Vite 输出静态文件至 `dist/`，部署到 GitHub Pages
+- **访问方式**：通过 `https://<username>.github.io/<repo>` 直接访问
 
 ---
 
