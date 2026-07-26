@@ -17,21 +17,22 @@ export function createEnvironment(): THREE.Group {
   const groundGeo = new THREE.PlaneGeometry(groundW, groundL)
   const ground = new THREE.Mesh(groundGeo, courtyardMat)
   ground.rotation.x = -Math.PI / 2
-  // 地面中心对齐建筑中心
-  ground.position.set(HW / 2 - aisleW / 2, -0.01, totalLen / 2)
+  // 地面中心 — 过道在SE侧(+X)，建筑居中偏左
+  ground.position.set(HW / 2 + aisleW / 2, -0.01, totalLen / 2)
   ground.receiveShadow = true
   group.add(ground)
 
-  // 过道地面 (西北侧红砖，宽1.5m)
+  // 过道地面 (东南侧红砖，宽1.5m)
+  // 注：Three.js lookAt 导致屏幕右=世界-X，因此过道放在+X(SE)侧以匹配视觉
   const aisleMat = createGroundMaterial(COLORS.aisle)
   const aisleGeo = new THREE.PlaneGeometry(aisleW, totalLen + margin * 2)
   const aisle = new THREE.Mesh(aisleGeo, aisleMat)
   aisle.rotation.x = -Math.PI / 2
-  aisle.position.set(-aisleW / 2, 0, totalLen / 2)
+  aisle.position.set(HW + margin / 2, 0, totalLen / 2)
   aisle.receiveShadow = true
   group.add(aisle)
 
-  // 邻居体块 (东南侧半透明)
+  // 邻居体块 (西北侧半透明)
   const neighborMat = createTranslucentMaterial(COLORS.neighbor, 0.3)
   const neighborW = DIMENSIONS.neighbor.width
   const neighborH = DIMENSIONS.neighbor.height
@@ -40,7 +41,7 @@ export function createEnvironment(): THREE.Group {
   const neighbor = new THREE.Mesh(neighborGeo, neighborMat)
   const gap = DIMENSIONS.neighbor.gap
   neighbor.position.set(
-    HW + gap + neighborW / 2,
+    -(gap + neighborW / 2),
     neighborH / 2,
     totalLen / 2
   )
