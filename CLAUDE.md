@@ -11,6 +11,8 @@
 
 - 依赖版本保持最新。升级时直接改 `package.json` + `npm install`，不要手动编辑 `package-lock.json`
 - Node 版本遵循 `deploy.yml` 中的 `node-version`（当前 26）
+- **禁止未经明确命令执行 `git push`**——只在用户明确要求推送/部署时才 push
+- Node 版本遵循 `deploy.yml` 中的 `node-version`（当前 26）
 
 ## 项目架构
 
