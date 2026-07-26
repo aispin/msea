@@ -72,8 +72,8 @@ export default function MobileControls({ inTour, onMove, onLook, onToggle }: Pro
 
   return (
     <>
-      <div ref={joystickRef} className="absolute inset-0 z-20 pointer-events-none" />
-      <div ref={lookRef} className="absolute right-0 top-0 bottom-0 w-1/2 z-20" />
+      <div ref={joystickRef} className="absolute inset-0 z-20" />
+      <div ref={lookRef} className="absolute right-0 top-0 bottom-0 w-1/2 z-20" style={{ touchAction: 'none' }} />
       <button
         onClick={onToggle}
         className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-black/60 text-white px-4 py-2 rounded-full text-sm"
