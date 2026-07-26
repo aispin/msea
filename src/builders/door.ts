@@ -1,15 +1,10 @@
 import * as THREE from 'three'
-import { DIMENSIONS, COLORS } from '../config/house'
+import { DIMENSIONS } from '../config/house'
 import { createWoodMaterial } from '../materials'
 
 export function createDoor(): THREE.Group {
   const group = new THREE.Group()
   const woodMat = createWoodMaterial()
-  const metalMat = new THREE.MeshStandardMaterial({
-    color: COLORS.doorRing,
-    roughness: 0.3,
-    metalness: 0.9,
-  })
 
   const doorW = DIMENSIONS.door.width    // 1.0m total
   const doorH = DIMENSIONS.door.height    // 2.1m
@@ -51,25 +46,41 @@ export function createDoor(): THREE.Group {
   rightFrame.position.set(doorCenterX + doorW / 2 + frameThick / 2, doorH / 2, doorT / 2)
   group.add(rightFrame)
 
-  // 门锁 — 金属底座+门环
-  const baseGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.01, 16)
-  const ringGeo = new THREE.TorusGeometry(0.022, 0.006, 8, 16)
+
+  // 门锁 — 4组（每扇门里外各一），圆形黑色底座 + 金属门环
+  const blackMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1a1a, roughness: 0.6, metalness: 0.2,
+  })
+  const ringMat = new THREE.MeshStandardMaterial({
+    color: 0xc9a96e, roughness: 0.3, metalness: 0.9,
+  })
+  const baseGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.012, 16)
+  const ringGeo = new THREE.TorusGeometry(0.035, 0.01, 8, 16)
 
   for (const side of [-1, 1]) {
     const lx = doorCenterX + side * halfW * 0.55
     const ly = doorH * 0.55
-    const lz = doorT / 2 + 0.005  // 5mm突出避免z-fighting
 
-    const base = new THREE.Mesh(baseGeo, metalMat)
-    base.rotation.x = Math.PI / 2
-    base.position.set(lx, ly, lz)
-    base.renderOrder = 1
-    group.add(base)
+    // 外侧（前门面，+Z）
+    const outerZ = doorT + 0.005
+    const ob = new THREE.Mesh(baseGeo, blackMat)
+    ob.rotation.x = Math.PI / 2
+    ob.position.set(lx, ly, outerZ)
+    group.add(ob)
+    const or_ = new THREE.Mesh(ringGeo, ringMat)
+    or_.position.set(lx, ly - 0.05, outerZ)
+    group.add(or_)
 
-    const ring = new THREE.Mesh(ringGeo, metalMat)
-    ring.position.set(lx, ly - 0.03, lz)
-    ring.renderOrder = 1
-    group.add(ring)
+    // 内侧（后门面，-Z）
+    const innerZ = -0.005
+    const ib = new THREE.Mesh(baseGeo, blackMat)
+    ib.rotation.x = -Math.PI / 2
+    ib.position.set(lx, ly, innerZ)
+    group.add(ib)
+    const ir = new THREE.Mesh(ringGeo, ringMat)
+    ir.rotation.y = Math.PI
+    ir.position.set(lx, ly - 0.05, innerZ)
+    group.add(ir)
   }
 
   // 门放置在 SW墙 z=0 处
