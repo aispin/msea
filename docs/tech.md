@@ -34,6 +34,31 @@
 
 **常见陷阱**：公式里 `width/2` 的正负号取决于旋转方向，用反会导致整窗偏移一个窗宽。
 
+## 方向指示器（罗盘）
+
+右上角 2D Canvas 覆盖层，红色指针固定朝上。N/E/S/W 表盘随镜头旋转，始终指示相机朝向。
+
+### 实现原理
+
+使用相机位置相对建筑中心的**方位角**（而非 `getWorldDirection`）计算镜头朝向：
+
+```
+centerX = (WL + HW + WL) / 2
+centerZ = totalLength / 2
+camAngle = atan2(camera.position.x - centerX, camera.position.z - centerZ) + π
+```
+
+`getWorldDirection` 在相机绕屋侧时 z 分量会变负号导致角度跳变；基于位置的方位角始终连续平滑。
+
+### 标签旋转
+
+```
+N: worldAngle = -π/4, E = π/4, S = 3π/4, W = -3π/4
+displayAngle = worldAngle + camAngle  // +号使表盘与建筑同向旋转
+```
+
+默认视角（相机在 SW 望 NE）：N 在左上，E 在右上，针指 NE。过道侧望房子：E 和 S 在上半区，针指 SE。
+
 ## 屋顶结构
 
 ### 层级顺序（从下到上）

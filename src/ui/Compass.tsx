@@ -14,7 +14,16 @@ const WL = 0.15
 const centerX = (WL + DIMENSIONS.houseWidth + WL) / 2
 const centerZ = ZONE_OFFSETS.totalLength / 2
 
-/** 红色指针固定朝上, 表盘随镜头位置旋转(与建筑方向一致) */
+/**
+ * 方向指示器 — 红色指针固定朝上, N/E/S/W 表盘随镜头旋转
+ *
+ * 实现: 相机位置相对建筑中心的方位角 + π = 镜头朝向
+ *       displayAngle = worldAngle + camAngle (表盘与建筑同向旋转)
+ *
+ * 坐标系 +Z=NE → worldAngle: N=-π/4, E=π/4, S=3π/4, W=-3π/4
+ * 默认视角(相机SW望NE): N左上 E右上 → 针指NE
+ * 过道侧(NW望SE): E和S在上半区 → 针指SE
+ */
 export default function Compass({ camera }: CompassProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
