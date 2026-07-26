@@ -58,8 +58,18 @@ export function createWalls(): THREE.Group {
   group.add(makeWall(HW + WL / 2, hBC / 2, zB + lBC / 2, WL, hBC, lBC))
   // B+C NE墙 (背面)
   group.add(makeWall(HW / 2, hBC / 2, totalZ, HW, hBC, WL))
-  // B+C SW墙 (与A区共享, 在A区墙体高度之上还有到檐口的部分)
-  // A区墙高3.15m, 与B区檐口同高, 所以SW墙不需要额外处理
+
+  // --- A-B 承重墙 (z=2.9,隔开A区和B区, 中间门洞无门板) ---
+  const innerDoorW = DIMENSIONS.door.width   // 1.0m, 与入户门同宽
+  const innerDoorH = DIMENSIONS.door.height + 0.5  // 2.6m, 比入户门高50cm
+  const innerSideW = (HW - innerDoorW) / 2   // 0.78m
+  // 左侧墙段
+  group.add(makeWall(innerSideW / 2, hA / 2, zB, innerSideW, hA, WL))
+  // 右侧墙段
+  group.add(makeWall(HW - innerSideW / 2, hA / 2, zB, innerSideW, hA, WL))
+  // 门洞过梁 (2.6m以上到3.15m)
+  const innerLintelH = hA - innerDoorH  // 0.55m
+  group.add(makeWall(HW / 2, innerDoorH + innerLintelH / 2, zB, HW, innerLintelH, WL))
 
   return group
 }

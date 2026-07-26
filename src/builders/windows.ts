@@ -68,23 +68,23 @@ export function createAllWindows(): THREE.Group {
   const lB = DIMENSIONS.zoneB.length     // 3.0
   const lC = DIMENSIONS.zoneC.length     // 2.55
 
-  // B区过道窗 — NW墙，B区中间
+  // B区过道窗 — SE墙（过道侧），B区中间
   const w1 = createWindow()
-  w1.rotation.y = -Math.PI / 2  // 面朝-X (西北/过道侧)
+  w1.rotation.y = Math.PI / 2  // 面朝+X (东南/过道侧)
   w1.position.set(
-    -0.15,
+    HW + 0.15,
     sillH,
-    zB + lB / 2 - winW / 2  // B区中心
+    zB + lB / 2 - winW / 2
   )
   group.add(w1)
 
-  // C区过道窗 — NW墙，C区中间
+  // C区过道窗 — SE墙（过道侧），C区中间
   const w2 = createWindow()
-  w2.rotation.y = -Math.PI / 2  // 面朝-X (西北/过道侧)
+  w2.rotation.y = Math.PI / 2  // 面朝+X (东南/过道侧)
   w2.position.set(
-    -0.15,
+    HW + 0.15,
     sillH,
-    zC + lC / 2 - winW / 2  // C区中心
+    zC + lC / 2 - winW / 2
   )
   group.add(w2)
 

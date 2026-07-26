@@ -122,13 +122,13 @@ export const LIGHTING = {
 } as const
 
 export const CAMERA = {
-  initialPosition: [1.28, 2.5, -3] as [number, number, number],
-  lookAt: [1.28, 1.5, 4.0] as [number, number, number],
+  initialPosition: [1.28, 5.0, -10] as [number, number, number],
+  lookAt: [1.28, 2.0, 4.225] as [number, number, number],
   fov: 50,
   near: 0.1,
-  far: 50,
+  far: 80,
   minDistance: 1,
-  maxDistance: 20,
+  maxDistance: 30,
 } as const
 
 /** 区域位置计算 (Z轴起点偏移) */

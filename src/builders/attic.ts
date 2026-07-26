@@ -36,33 +36,22 @@ export function createAttic(): THREE.Group {
     group.add(pillar)
   }
 
-  // 爬梯 (B区SE墙内侧)
-  const ladderW = DIMENSIONS.attic.ladderWidth        // 0.4m
-  const rungCount = DIMENSIONS.attic.ladderRungCount   // 8
-  const rungSpacing = floorH / (rungCount + 1)
-  const sideRailGeo = new THREE.BoxGeometry(0.04, floorH, 0.04)
-  const rungGeo = new THREE.BoxGeometry(ladderW, 0.03, 0.04)
-  // 左轨
-  const leftRail = new THREE.Mesh(sideRailGeo, woodMat)
-  leftRail.position.set(HW - 0.2, floorH / 2, zC + lC / 2)
-  group.add(leftRail)
-  // 右轨
-  const rightRail = new THREE.Mesh(sideRailGeo, woodMat)
-  rightRail.position.set(HW - 0.2 + ladderW, floorH / 2, zC + lC / 2)
-  group.add(rightRail)
-  // 横档
-  for (let i = 1; i <= rungCount; i++) {
-    const rung = new THREE.Mesh(rungGeo, woodMat)
-    rung.position.set(HW - 0.2 + ladderW / 2, i * rungSpacing, zC + lC / 2)
-    group.add(rung)
-  }
-
-  // A区天台围栏 (女儿墙，高0.9m)
+  // A区天花板 + 天台围栏
+  const hA = DIMENSIONS.zoneA.wallHeight
   const lA = DIMENSIONS.zoneA.length
+
+  // 天花板 (平顶，在墙体顶部3.15m)
+  const ceilingGeoA = new THREE.PlaneGeometry(HW, lA)
+  const ceilingA = new THREE.Mesh(ceilingGeoA, createParapetMaterial())
+  ceilingA.rotation.x = -Math.PI / 2
+  ceilingA.position.set(HW / 2, hA, lA / 2)
+  ceilingA.receiveShadow = true
+  group.add(ceilingA)
+
+  // 女儿墙 (高0.9m)
   const parapetH = DIMENSIONS.zoneA.parapetHeight
   const parapetT = 0.1
-  const wallH = DIMENSIONS.zoneA.wallHeight
-  const parapetY = wallH + parapetH / 2
+  const parapetY = hA + parapetH / 2
 
   // NW侧围栏
   const nwParapet = new THREE.Mesh(
