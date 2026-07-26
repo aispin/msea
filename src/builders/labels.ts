@@ -53,9 +53,8 @@ export function createLabels(): THREE.Group {
   labelC.position.set(HW / 2, hBC + 0.8, zC + lC / 2)
   group.add(labelC)
 
-  // 方向标识 (N/S/E/W) 地面固定
-  // 建筑轴线: +Z=NE(45°), -Z=SW(225°), -X=NW(315°), +X=SE(135°)
-  // 真实罗盘方向相对建筑轴线旋转 45°
+  // 方向标识 (N/S/E/W) 地面固定 — 与罗盘方向一致
+  // 相机在-Z看+Z时屏幕左=世界+X，故N/W在+X侧(屏幕左)，S/E在-X侧(屏幕右)
   const margin = 4.0
   const dirY = 0.05
   const cx = HW / 2
@@ -63,10 +62,10 @@ export function createLabels(): THREE.Group {
   const dist = Math.max(totalLen, HW) / 2 + margin
   const cos45 = Math.SQRT1_2 // ≈0.707
   const dirData: [string, number, number][] = [
-    ['N', cx - dist * cos45, cz + dist * cos45],
-    ['S', cx + dist * cos45, cz - dist * cos45],
-    ['E', cx + dist * cos45, cz + dist * cos45],
-    ['W', cx - dist * cos45, cz - dist * cos45],
+    ['N', cx + dist * cos45, cz + dist * cos45],
+    ['S', cx - dist * cos45, cz - dist * cos45],
+    ['E', cx - dist * cos45, cz + dist * cos45],
+    ['W', cx + dist * cos45, cz - dist * cos45],
   ]
   for (const [text, x, z] of dirData) {
     const sprite = createTextSprite(text, 56, 0x1a1a2e)
