@@ -3,8 +3,6 @@ import * as THREE from 'three'
 const MOVE_SPEED = 3.0 // m/s
 const MOUSE_SENSITIVITY = 0.002
 const COLLISION_RADIUS = 0.2
-const EYE_HEIGHT = 1.6
-
 interface CollisionBox {
   min: THREE.Vector3
   max: THREE.Vector3
@@ -143,8 +141,9 @@ export function buildHouseCollisionBoxes(): CollisionBox[] {
   const zAB = ZONE_OFFSETS.zoneBStart  // A-B墙NE面
 
   const boxes: CollisionBox[] = [
-    // SW外墙 (正面)
-    { min: new THREE.Vector3(0, 0, 0), max: new THREE.Vector3(totalX, 5, WL) },
+    // SW外墙 (正面) — 分为两段，中间留门洞1.0m
+    { min: new THREE.Vector3(0, 0, 0), max: new THREE.Vector3(totalX / 2 - 0.5, 5, WL) },
+    { min: new THREE.Vector3(totalX / 2 + 0.5, 0, 0), max: new THREE.Vector3(totalX, 5, WL) },
     // NW外墙 (过道侧)
     { min: new THREE.Vector3(0, 0, 0), max: new THREE.Vector3(WL, 5, zEnd) },
     // SE外墙 (邻居侧)

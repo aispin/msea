@@ -28,7 +28,6 @@ export function createWalls(): THREE.Group {
   const lC = DIMENSIONS.zoneC.length         // 2.55
 
   // 区域边界Z坐标
-  const z0 = ZONE_OFFSETS.wallSW             // 0   SW墙外
   const zA = ZONE_OFFSETS.zoneAStart         // 0.15  A区起
   const zAB = ZONE_OFFSETS.zoneBStart        // 3.20  B区起 (= A-B墙NE面)
   const zC = ZONE_OFFSETS.zoneCStart         // 6.20  C区起

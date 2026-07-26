@@ -46,7 +46,6 @@ export function createAllWindows(): THREE.Group {
   const WL = 0.15
   const totalX = WL + DIMENSIONS.houseWidth + WL
   const zB = ZONE_OFFSETS.zoneBStart
-  const zC = ZONE_OFFSETS.zoneCStart
   const zEnd = ZONE_OFFSETS.totalLength
   const lB = DIMENSIONS.zoneB.length
   const lC = DIMENSIONS.zoneC.length

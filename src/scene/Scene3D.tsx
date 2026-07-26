@@ -211,8 +211,8 @@ export default function Scene3D({ onCameraReady }: Props) {
         new THREE.Vector3(doorCenterX + 0.5, DIMENSIONS.door.height, WL),
       )
 
-      const intersect = raycaster.intersectBox(doorBox, new THREE.Vector3())
-      if (intersect) {
+      raycaster.setFromCamera(mouse, camera)
+      if (raycaster.ray.intersectsBox(doorBox)) {
         enterTour()
       }
     }

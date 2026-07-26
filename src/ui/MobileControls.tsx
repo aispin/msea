@@ -26,8 +26,8 @@ export default function MobileControls({ inTour, onMove, onLook, onToggle }: Pro
       size: 120,
     })
 
-    nipple.on('move', (_: any, data: any) => {
-      moveRef.current = { x: data.vector.x, y: -data.vector.y }
+    nipple.on('move', (evt) => {
+      moveRef.current = { x: evt.data.vector.x, y: -evt.data.vector.y }
     })
     nipple.on('end', () => { moveRef.current = { x: 0, y: 0 } })
 

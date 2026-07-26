@@ -17,7 +17,6 @@ export function createRoof(): THREE.Group {
   const roofWidth = totalX + sideOverhang * 2  // 含侧边出挑
   const roofLen = DIMENSIONS.roof.totalLength  // 5.55 (B+C内净)
   const zStart = ZONE_OFFSETS.zoneBStart       // B区起始
-  const zEnd = ZONE_OFFSETS.totalLength         // 建筑总长
   const triH = ridgeH - eaveH
 
   const roofLenWithOverhang = roofLen + 2 * overhang + WL
