@@ -142,6 +142,11 @@ const lA = DIMENSIONS.zoneA.length  // 2.9
 const lB = DIMENSIONS.zoneB.length  // 3.0
 const lC = DIMENSIONS.zoneC.length  // 2.55
 
+/** 建筑总宽 (含墙厚) */
+export const totalX = WL + DIMENSIONS.houseWidth + WL  // 2.86
+/** 墙厚 */
+export { WL }
+
 export const ZONE_OFFSETS = {
   /** SW墙外表面 */     wallSW: 0,
   /** A区内净起始 */     zoneAStart: WL,

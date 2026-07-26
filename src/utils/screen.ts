@@ -8,11 +8,8 @@
  *       建筑总宽 totalX=2.86, 总长 totalZ≈8.90
  */
 
-import { ZONE_OFFSETS } from '../config/house'
+import { totalX, ZONE_OFFSETS } from '../config/house'
 
-const WL = 0.15
-const HW = 2.56 // 内净宽, 与 config 一致
-const totalX = WL + HW + WL
 const totalZ = ZONE_OFFSETS.totalLength
 
 /** 过道侧(屏幕左) X坐标 */
