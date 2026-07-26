@@ -193,28 +193,6 @@ export default function Scene3D({ onCameraReady }: Props) {
     // Handle Escape key → FirstPerson disables itself → call exitTour
     firstPerson.setOnExternalDisable(() => exitTour())
 
-    function onCanvasClick(e: MouseEvent) {
-      if (firstPerson.isActive) return
-
-      const mouse = new THREE.Vector2()
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1
-
-      const raycaster = new THREE.Raycaster()
-      raycaster.setFromCamera(mouse, camera)
-
-      // 门在 SW墙上，中心 X = totalX/2, Z: 0~WL, Y: 0~door.height
-      const doorBox = new THREE.Box3(
-        new THREE.Vector3(doorCenterX - 0.5, 0, 0),
-        new THREE.Vector3(doorCenterX + 0.5, DIMENSIONS.door.height, WL),
-      )
-
-      raycaster.setFromCamera(mouse, camera)
-      if (raycaster.ray.intersectsBox(doorBox)) {
-        enterTour()
-      }
-    }
-    renderer.domElement.addEventListener('click', onCanvasClick)
 
     // ─── Animation loop ──────────────────────────────────────────
     let animId: number
@@ -252,7 +230,6 @@ export default function Scene3D({ onCameraReady }: Props) {
       cancelAnimationFrame(animId)
       window.removeEventListener('keydown', onKeyD)
       window.removeEventListener('resize', onResize)
-      renderer.domElement.removeEventListener('click', onCanvasClick)
       firstPerson.disable()
       controls.dispose()
       renderer.dispose()
