@@ -25,7 +25,6 @@ export function createWalls(): THREE.Group {
 
   const zA = ZONE_OFFSETS.zoneAStart
   const zB = ZONE_OFFSETS.zoneBStart
-  const zC = ZONE_OFFSETS.zoneCStart
   const totalZ = ZONE_OFFSETS.totalLength
 
   // --- A区墙体 ---

@@ -61,7 +61,6 @@ export function createAllWindows(): THREE.Group {
   const group = new THREE.Group()
 
   const winW = DIMENSIONS.window.width   // 1.2m
-  const winH = DIMENSIONS.window.height   // 1.5m
   const sillH = DIMENSIONS.window.sillHeight // 1.2m
   const HW = DIMENSIONS.houseWidth
   const zB = ZONE_OFFSETS.zoneBStart     // 2.9
