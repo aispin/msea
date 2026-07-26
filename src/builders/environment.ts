@@ -27,7 +27,7 @@ export function createEnvironment(): THREE.Group {
   const aisleGeo = new THREE.PlaneGeometry(aisleW, totalLen + margin * 2)
   const aisle = new THREE.Mesh(aisleGeo, aisleMat)
   aisle.rotation.x = -Math.PI / 2
-  aisle.position.set(HW + margin / 2, 0, totalLen / 2)
+  aisle.position.set(-aisleW / 2, 0, totalLen / 2)
   aisle.receiveShadow = true
   group.add(aisle)
 
