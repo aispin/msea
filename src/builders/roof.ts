@@ -3,23 +3,15 @@ import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
 import { createRoofMaterial, createWallMaterial } from '../materials'
 
 /**
- * 屋顶几何逻辑
- * ============
- * 单坡斜率: triH / (roofLen/2) → roofAngle = atan2(triH, roofLen/2)
- *   triH = ridgeH - eaveH = 5.0 - 3.15 = 1.85m
- *   roofLen = B+C 内净总长 = 5.55m, 半跨 = 2.775m
- *   roofAngle ≈ 33.7°
+ * 屋顶几何 — 以椽条为基准, 所有构件通过函数联动计算
+ * ======================================================
+ * 椽条顶面与墙顶平齐(eaveH), 实现无缝防水衔接
+ * 椽条底面埋入墙内, 长度覆盖整个墙厚
  *
- * 瓦片(外层): 覆盖含挑檐的完整屋顶
- *   Z跨度 = roofLenWithOverhang = roofLen + 2*overhang + WL ≈ 5.86m
- *   坡面实长 = sqrt(halfTile² + triH²)
- *
- * 椽条(内层): 墙到墙, 搁在A-B墙和NE墙上
- *   水平跨度 = roofLen/2 = 2.775m (内净半跨)
- *   坡面实长 = sqrt((roofLen/2)² + triH²) ≈ 3.33m
- *   中心Y = tileBottomY - rafterHalfH*cos(roofAngle)
- *          = (eaveH + triH/2 - TILE_THICK) - 0.05*cos(roofAngle)
- *   椽条顶面紧贴瓦片底面
+ * 联动关系:
+ *   瓦片底面 = 椽条顶面 + TILE_THICK → 瓦片顶面
+ *   檩条顶面 = 椽条底面 − purlinH/2 → 檩条中心
+ *   墙尖顶边 = 瓦片顶面(随坡度)
  */
 
 export function createRoof(): THREE.Group {
@@ -29,105 +21,106 @@ export function createRoof(): THREE.Group {
 
   const WL = 0.15
   const HW = DIMENSIONS.houseWidth
-  const totalX = WL + HW + WL                    // 建筑总宽 2.86m
-  const eaveH = DIMENSIONS.roof.eaveHeight       // 3.15m
-  const ridgeH = DIMENSIONS.roof.ridgeHeight     // 5.0m
-  const overhang = DIMENSIONS.roof.overhang      // 0.08m
-  const sideOverhang = WL / 2 + 0.08             // 侧边出挑
-  const roofWidth = totalX + sideOverhang * 2    // 瓦片总宽
-  const roofLen = DIMENSIONS.roof.totalLength    // 5.55m (B+C内净)
-  const zStart = ZONE_OFFSETS.zoneBStart         // 3.20m (B区起始)
-  const triH = ridgeH - eaveH                    // 1.85m
-
-  // 屋顶斜率 — 由内净尺寸决定, 瓦片和椽条共用
+  const totalX = WL + HW + WL
+  const eaveH = DIMENSIONS.roof.eaveHeight
+  const ridgeH = DIMENSIONS.roof.ridgeHeight
+  const overhang = DIMENSIONS.roof.overhang
+  const sideOverhang = WL / 2 + 0.08
+  const roofWidth = totalX + sideOverhang * 2
+  const roofLen = DIMENSIONS.roof.totalLength
+  const zStart = ZONE_OFFSETS.zoneBStart
+  const triH = ridgeH - eaveH
   const roofAngle = Math.atan2(triH, roofLen / 2)
   const TILE_THICK = 0.03
 
-  // ─── 自下而上建造: 椽条定义坡度 → 瓦片继承 ──────
+  // 外墙位置
+  const wallAB_SW = zStart - WL / 2
+  const wallNE_NE = zStart + roofLen + WL
+
+  // ─── 椽条参数(源头) ─────────────────────────────────
   const rafterHalfH = 0.05
   const rafterDY = rafterHalfH * Math.cos(roofAngle)
-  const wallTopY = eaveH
-  const rafterTopAtWall = wallTopY + 2 * rafterDY  // 墙顶处椽条顶面Y
+  // 椽条顶面与墙顶平齐 → 无缝防水
+  const rafterTopAtWall = eaveH
+  const rafterCenterAtWall = rafterTopAtWall - rafterDY
+  const rafterBottomAtWall = rafterTopAtWall - 2 * rafterDY
+  // 椽条覆盖全墙厚(外墙到外墙)
+  const rafterStartZ = wallAB_SW
+  const rafterEndZ   = wallNE_NE
+  const ridgeZ = (wallAB_SW + wallNE_NE) / 2
+  const rafterTopAtRidge = rafterTopAtWall + (ridgeZ - rafterStartZ) * Math.tan(roofAngle)
 
-  // B+C区两面外墙的外表面Z坐标
-  const wallAB_SW = zStart - WL / 2              // A-B隔墙朝SW的外表面
-  const wallNE_NE = zStart + roofLen + WL        // NE墙朝NE的外表面
+  // ─── 联动函数 ────────────────────────────────────────
+  /** 椽条中心Y @ Z */
+  function rafterCY(z: number): number {
+    if (z <= ridgeZ) return rafterCenterAtWall + (z - rafterStartZ) * Math.tan(roofAngle)
+    return rafterCenterAtWall + (rafterEndZ - z) * Math.tan(roofAngle)
+  }
+  /** 椽条顶面Y */
+  function rafterTopY(z: number): number { return rafterCY(z) + rafterDY }
+  /** 椽条底面Y */
+  function rafterBotY(z: number): number { return rafterCY(z) - rafterDY }
+  /** 瓦片底面Y */
+  function tileBotY(z: number): number { return rafterTopY(z) }
+  /** 瓦片顶面Y */
+  function tileTopY(z: number): number { return tileBotY(z) + TILE_THICK }
+  /** 檩条中心Y */
+  function purlinCY(z: number): number { return rafterBotY(z) - 0.05 }  // purlinH/2 = 0.05
 
-  // 1) 椽条 — 搭墙头5cm, ridge取两面外墙中点, 对称
+  // ─── 1) 椽条 ─────────────────────────────────────────
   const interiorW = HW
-  const wallInset = 0.05
-  const rafterStartZ = wallAB_SW + wallInset
-  const rafterEndZ   = wallNE_NE  - wallInset
-  const rafterRidgeZ = (wallAB_SW + wallNE_NE) / 2       // 屋脊在两面外墙中点
-  const rafterTopAtRidge = rafterTopAtWall + (rafterRidgeZ - rafterStartZ) * Math.tan(roofAngle)
-
-  const rafterSlopeLen = Math.sqrt((rafterRidgeZ - rafterStartZ) ** 2 + (rafterTopAtRidge - rafterTopAtWall) ** 2)
+  const halfRafter = (rafterEndZ - rafterStartZ) / 2
+  const rafterLen = Math.sqrt(halfRafter ** 2 + triH ** 2)
   const rafterMat = new THREE.MeshStandardMaterial({ color: 0x8b6914, roughness: 0.7 })
   const rafterCount = Math.ceil(interiorW / 0.4)
-  const rafterGeo = new THREE.BoxGeometry(0.06, 0.10, rafterSlopeLen)
+  const rafterGeo = new THREE.BoxGeometry(0.06, 0.10, rafterLen)
 
   for (let i = 0; i <= rafterCount; i++) {
     const rx = WL + (i / rafterCount) * interiorW
+    // 前坡
     const rf = new THREE.Mesh(rafterGeo, rafterMat)
     rf.rotation.set(-roofAngle, 0, 0)
-    const rfCZ = rafterStartZ + (rafterRidgeZ - rafterStartZ) / 2
-    const rfCY = wallTopY + rafterDY + (rfCZ - rafterStartZ) * Math.tan(roofAngle)
-    rf.position.set(rx, rfCY, rfCZ)
+    const rfCZ = rafterStartZ + halfRafter / 2
+    rf.position.set(rx, rafterCY(rfCZ), rfCZ)
     group.add(rf)
-
+    // 后坡
     const rb = new THREE.Mesh(rafterGeo, rafterMat)
     rb.rotation.set(roofAngle, 0, 0)
-    const rbCZ = rafterRidgeZ + (rafterEndZ - rafterRidgeZ) / 2
-    const rbCY = wallTopY + rafterDY + (rafterEndZ - rbCZ) * Math.tan(roofAngle)
-    rb.position.set(rx, rbCY, rbCZ)
+    const rbCZ = rafterEndZ - halfRafter / 2
+    rb.position.set(rx, rafterCY(rbCZ), rbCZ)
     group.add(rb)
   }
 
-  // 2) 檩条 + 顶梁 — 在椽条下方, 成对出现, 依坡度定高
+  // ─── 2) 檩条 + 屋脊梁 ──────────────────────────────
   const purlinMat = new THREE.MeshStandardMaterial({ color: 0x6b4c1e, roughness: 0.6 })
-  const purlinH = 0.10
   const purlinCount = 3
-  const wallGap = 0.10  // 墙头处向内偏移, 避免嵌入墙体
-  // 前坡: 从墙内侧到屋脊前, 均匀分布
-  const frontSpan = rafterRidgeZ - rafterStartZ - wallGap
-  const frontStep = frontSpan / (purlinCount - 0.5)
+  const frontSpan = ridgeZ - rafterStartZ
+  const backSpan  = rafterEndZ - ridgeZ
   for (let i = 0; i < purlinCount; i++) {
-    const zf = rafterStartZ + wallGap + i * frontStep
-    const yf = wallTopY + (zf - rafterStartZ) * Math.tan(roofAngle) - purlinH / 2
-    const pf = new THREE.Mesh(new THREE.BoxGeometry(interiorW, purlinH, 0.08), purlinMat)
-    pf.position.set(totalX / 2, yf, zf)
+    const zf = rafterStartZ + ((i + 1) / (purlinCount + 1)) * frontSpan
+    const pf = new THREE.Mesh(new THREE.BoxGeometry(interiorW, 0.10, 0.08), purlinMat)
+    pf.position.set(totalX / 2, purlinCY(zf), zf)
     group.add(pf)
-  }
-  const backSpan = rafterEndZ - rafterRidgeZ - wallGap
-  const backStep = backSpan / (purlinCount - 0.5)
-  for (let i = 0; i < purlinCount; i++) {
-    const zb = rafterEndZ - wallGap - i * backStep
-    const yb = wallTopY + (rafterEndZ - zb) * Math.tan(roofAngle) - purlinH / 2
-    const pb = new THREE.Mesh(new THREE.BoxGeometry(interiorW, purlinH, 0.08), purlinMat)
-    pb.position.set(totalX / 2, yb, zb)
+    const zb = rafterEndZ - ((i + 1) / (purlinCount + 1)) * backSpan
+    const pb = new THREE.Mesh(new THREE.BoxGeometry(interiorW, 0.10, 0.08), purlinMat)
+    pb.position.set(totalX / 2, purlinCY(zb), zb)
     group.add(pb)
   }
-
-  // 顶梁(屋脊梁) — ridge正下方, 顶面贴椽底
-  const ridgeBottom = wallTopY + (rafterRidgeZ - rafterStartZ) * Math.tan(roofAngle)
-  const beamGeo = new THREE.BoxGeometry(interiorW, 0.18, 0.14)
-  const beam = new THREE.Mesh(beamGeo, purlinMat)
-  beam.position.set(totalX / 2, ridgeBottom - 0.09, rafterRidgeZ)
+  // 屋脊梁
+  const ridgeBottom = rafterBotY(ridgeZ)
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(interiorW, 0.18, 0.14), purlinMat)
+  beam.position.set(totalX / 2, ridgeBottom - 0.09, ridgeZ)
   group.add(beam)
 
-  // 3) 瓦片 — 搭在椽条上方, 同坡度
+  // ─── 3) 瓦片 ─────────────────────────────────────────
   const tileBaseZ = wallAB_SW
   const tileBackZ = wallNE_NE + overhang
-  const tileRidgeZ = rafterRidgeZ                            // 瓦片屋脊与椽条对齐
-  const tileRidgeTop = rafterTopAtRidge + TILE_THICK
-  const tileRidgeBot = rafterTopAtRidge
+  const tileRidgeTop = tileTopY(ridgeZ)
+  const tileRidgeBot = tileBotY(ridgeZ)
+  const frontEaveTop = tileTopY(tileBaseZ)
+  const backEaveTop  = tileTopY(tileBackZ)
 
-  const frontEaveTop = rafterTopAtWall + TILE_THICK - (rafterStartZ - tileBaseZ) * Math.tan(roofAngle)
-  const backEaveTop  = rafterTopAtWall + TILE_THICK - (tileBackZ - rafterEndZ)  * Math.tan(roofAngle)
-
-  // makeTile + 组装
   roofMat.side = THREE.DoubleSide
-  const halfTileLen = tileRidgeZ - tileBaseZ
   function makeTile(x0: number, z0: number, y0: number, zR: number): THREE.Mesh {
     const hw = roofWidth / 2
     const geo = new THREE.BufferGeometry()
@@ -148,26 +141,27 @@ export function createRoof(): THREE.Group {
     m.castShadow = true
     return m
   }
+  group.add(makeTile(totalX / 2, tileBaseZ, frontEaveTop, ridgeZ))
+  group.add(makeTile(totalX / 2, tileBackZ, backEaveTop, ridgeZ))
 
-  group.add(makeTile(totalX / 2, tileBaseZ, frontEaveTop, tileRidgeZ))
-  group.add(makeTile(totalX / 2, tileBackZ, backEaveTop, tileRidgeZ))
-
-  // ─── 山墙 (根据实际瓦片顶点) ──────────────────────
+  // ─── 墙尖(山墙三角顶) ──────────────────────────────
   const gableShape = new THREE.Shape()
-  gableShape.moveTo(0, frontEaveTop - eaveH)
-  gableShape.lineTo(tileRidgeZ - tileBaseZ, tileRidgeTop - eaveH)
-  gableShape.lineTo(tileBackZ - tileBaseZ, backEaveTop - eaveH)
+  gableShape.moveTo(0, 0)
+  gableShape.lineTo(ridgeZ - tileBaseZ, tileRidgeTop - eaveH)
+  gableShape.lineTo(wallNE_NE - tileBaseZ, 0)
   gableShape.closePath()
-  const gableGeo = new THREE.ShapeGeometry(gableShape)
+  const gableGeo = new THREE.ExtrudeGeometry(gableShape, { steps: 1, depth: WL, bevelEnabled: false })
+  const gableMat = wallMat.clone()
+  gableMat.side = THREE.DoubleSide
 
-  const gableNW = new THREE.Mesh(gableGeo, wallMat)
+  const gableNW = new THREE.Mesh(gableGeo, gableMat)
   gableNW.rotation.y = -Math.PI / 2
-  gableNW.position.set(-sideOverhang, eaveH, tileBaseZ)
+  gableNW.position.set(WL, eaveH, tileBaseZ)
   group.add(gableNW)
 
-  const gableSE = new THREE.Mesh(gableGeo, wallMat)
+  const gableSE = new THREE.Mesh(gableGeo, gableMat)
   gableSE.rotation.y = -Math.PI / 2
-  gableSE.position.set(totalX + sideOverhang, eaveH, tileBaseZ)
+  gableSE.position.set(totalX, eaveH, tileBaseZ)
   group.add(gableSE)
 
   return group

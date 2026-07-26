@@ -65,51 +65,42 @@ roofAngle  = atan2(triH, roofLen/2) ≈ 33.7°
 ```
 
 
-### 构件尺寸与定位
+### 构件联动函数（以椽条为源头）
 
-#### 椽条（内层，先建）
+椽条顶面与墙顶平齐 → 无缝防水。所有构件通过函数从椽条参数派生：
 
-1. 搁在墙顶上（外墙表面内侧 5cm）
-2. 坡度 `roofAngle`，从 `rafterStartZ` 上升到 `ridgeZ`（前坡），从 `ridgeZ` 降到 `rafterEndZ`（后坡）
-3. 椽底 Y = `wallTopY`（墙顶），椽中心 Y = `wallTopY + rafterDY`，椽顶 Y = `wallTopY + 2 × rafterDY`
-4. 椽顶在 ridge 处：`rafterTopAtRidge = rafterTopAtWall + (ridgeZ - rafterStartZ) × tan(roofAngle)`
-5. 截面：BoxGeometry(0.06, 0.10, slopeLen)，间距 40cm
+```typescript
+rafterTopAtWall = eaveH  // 椽顶与墙顶平齐, 无缝
+rafterStartZ = wallAB_SW  // 铺满墙厚(外墙到外墙)
+rafterEndZ   = wallNE_NE
+ridgeZ = (wallAB_SW + wallNE_NE) / 2
 
-#### 瓦片（外层，椽条上方）
+// 联动函数
+rafterCY(z)  = rafterCenterAtWall ± (z − anchorZ) × tan(roofAngle)  // ±取决于前后坡
+rafterTopY(z) = rafterCY(z) + rafterDY
+rafterBotY(z) = rafterCY(z) − rafterDY
+tileBotY(z)   = rafterTopY(z)
+tileTopY(z)   = tileBotY(z) + TILE_THICK
+purlinCY(z)   = rafterBotY(z) − purlinH/2
+```
 
-1. 瓦底 = 椽顶，同坡度 `roofAngle`
-2. 前檐口：齐平前墙外表面（无出挑）
-3. 后檐口：出挑 8cm 超过后墙外表面
-4. 檐口高度 = `椽顶在墙处 + TILE_THICK − 出挑水平距 × tan(roofAngle)`
-5. 屋脊高度 = `rafterTopAtRidge + TILE_THICK`
-6. 厚度：3cm，DoubleSide，8 顶点 BufferGeometry
+修改椽条参数（`rafterTopAtWall`、`rafterStartZ`），瓦片、檩条、墙尖全部自动联动。
 
-#### 层级 Y 偏移
+#### 椽条
 
-BoxGeometry 经 `rotation.x` 旋转后，局部 Y 在 world Y 的投影 = `halfHeight × cos(angle)`。
+- 截面：BoxGeometry(0.06, 0.10, len)，间距 40cm
+- Z 范围：`wallAB_SW` → `wallNE_NE`（铺满墙厚）
 
-从瓦片顶面向下：
+#### 瓦片
 
-| 层 | Y 偏移 | 说明 |
-|---|---|---|
-| 瓦片顶面 | `eaveH + triH/2`（中点） | 坡面几何中点 |
-| 瓦片底面 | 顶面 − `TILE_THICK` | 3cm 厚壳 |
-| 椽条顶面 | 瓦片底面 | 紧贴 |
-| 椽条中心 | 顶面 − `rafterHalfH×cos(angle)` | Box 旋转后半高 |
-| 椽条底面 | 中心 − `rafterHalfH×cos(angle)` | |
+- 前檐口齐平 A-B 墙（无出挑），后檐口出挑 8cm
+- 厚度 3cm，8 顶点 BufferGeometry + 四侧面，DoubleSide
 
-#### 檩条（中层，椽条下方）
+#### 檩条
 
-在椽条底部逐对添加，成对分布在前后坡。数量确定后，根据坡度逐对计算高度。
-
-- 截面：BoxGeometry(interiorW, 10cm, 8cm)，材质深木色
-- 前后坡各 3 根，含墙头处（但向内侧偏移 10cm 避免嵌入墙体）
-- 间距均匀：`frontStep = (ridgeZ - rafterStartZ - wallGap) / (count - 0.5)`
-- 高度 = `wallTopY + 水平距 × tan(roofAngle) − purlinH/2`（顶面贴椽底）
-- 无出挑，仅在内净范围
+- 前后坡各 3 根，Z 向均匀分布（等间距）
+- 截面 10×8cm，顶面贴椽底 = `purlinCY(z)`
 
 #### 屋脊梁
 
-- 位于屋脊正下方
-- 截面：BoxGeometry(interiorW, 18cm, 14cm)
-- 顶面紧贴椽条底面（屋脊处按实际位置计算）
+- 截面 18×14cm，顶面贴椽底(屋脊处)

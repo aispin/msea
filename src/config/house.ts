@@ -75,9 +75,9 @@ export const DIMENSIONS = {
   /** 邻居体块 */
   neighbor: {
     width: 0.5,
-    length: 8.45,      // 与建筑总长一致
+    length: 8.90,      // 与建筑总长一致
     height: 4.0,
-    gap: 0.3,          // 与建筑的间距
+    gap: 0.3,
   },
 
   /** 地面 */
