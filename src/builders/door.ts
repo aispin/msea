@@ -9,6 +9,11 @@ export function createDoor(): THREE.Group {
     color: COLORS.doorRing,
     roughness: 0.3,
     metalness: 0.9,
+    depthTest: true,
+    depthWrite: true,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
   })
 
   const doorW = DIMENSIONS.door.width    // 1.0m total

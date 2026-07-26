@@ -122,7 +122,7 @@ export const LIGHTING = {
 } as const
 
 export const CAMERA = {
-  initialPosition: [1.28, 5.0, -10] as [number, number, number],
+  initialPosition: [1.28, 3.5, -6] as [number, number, number],
   lookAt: [1.28, 2.0, 4.225] as [number, number, number],
   fov: 50,
   near: 0.1,
