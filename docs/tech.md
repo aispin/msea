@@ -48,9 +48,9 @@
 
 建造顺序：**椽条 → 瓦片**。每一层在下一层基础上计算叠加。
 
-**屋脊定位**：取 B+C 区前外墙（A-B 墙外表面）和后外墙（NE 墙外表面）的中点，确保前后对称。注意不含 A 区天台外墙。
+**屋脊定位**：取 B+C 区两面外墙的中点——`wallAB_SW`（A-B 隔墙朝 SW 的外表面）与 `wallNE_NE`（NE 墙朝 NE 的外表面）。不含 A 区天台。
 ```
-ridgeZ = (frontWallExt + backWallExt) / 2
+ridgeZ = (wallAB_SW + wallNE_NE) / 2
 ```
 前后椽条从此中点分别向两端下降，在同一高度交汇。
 
@@ -98,12 +98,15 @@ BoxGeometry 经 `rotation.x` 旋转后，局部 Y 在 world Y 的投影 = `halfH
 | 椽条中心 | 顶面 − `rafterHalfH×cos(angle)` | Box 旋转后半高 |
 | 椽条底面 | 中心 − `rafterHalfH×cos(angle)` | |
 
-#### 檩条（中层）
+#### 檩条（中层，椽条下方）
 
-- 沿 X 轴水平布置，支撑椽条
-- 截面：BoxGeometry(interiorW, 10cm, 8cm)
-- 每坡 4 根，Z 向均匀分布
-- 顶面紧贴椽条底面
+在椽条底部逐对添加，成对分布在前后坡。数量确定后，根据坡度逐对计算高度。
+
+- 截面：BoxGeometry(interiorW, 10cm, 8cm)，材质深木色
+- 前后坡各 3 根，含墙头处（但向内侧偏移 10cm 避免嵌入墙体）
+- 间距均匀：`frontStep = (ridgeZ - rafterStartZ - wallGap) / (count - 0.5)`
+- 高度 = `wallTopY + 水平距 × tan(roofAngle) − purlinH/2`（顶面贴椽底）
+- 无出挑，仅在内净范围
 
 #### 屋脊梁
 

@@ -49,16 +49,16 @@ export function createRoof(): THREE.Group {
   const wallTopY = eaveH
   const rafterTopAtWall = wallTopY + 2 * rafterDY  // 墙顶处椽条顶面Y
 
-  // 外墙位置
-  const frontWallExt = zStart - WL / 2
-  const backWallExt  = zStart + roofLen + WL
+  // B+C区两面外墙的外表面Z坐标
+  const wallAB_SW = zStart - WL / 2              // A-B隔墙朝SW的外表面
+  const wallNE_NE = zStart + roofLen + WL        // NE墙朝NE的外表面
 
   // 1) 椽条 — 搭墙头5cm, ridge取两面外墙中点, 对称
   const interiorW = HW
   const wallInset = 0.05
-  const rafterStartZ = frontWallExt + wallInset
-  const rafterEndZ   = backWallExt  - wallInset
-  const rafterRidgeZ = (frontWallExt + backWallExt) / 2       // 屋脊在两面外墙中点
+  const rafterStartZ = wallAB_SW + wallInset
+  const rafterEndZ   = wallNE_NE  - wallInset
+  const rafterRidgeZ = (wallAB_SW + wallNE_NE) / 2       // 屋脊在两面外墙中点
   const rafterTopAtRidge = rafterTopAtWall + (rafterRidgeZ - rafterStartZ) * Math.tan(roofAngle)
 
   const rafterSlopeLen = Math.sqrt((rafterRidgeZ - rafterStartZ) ** 2 + (rafterTopAtRidge - rafterTopAtWall) ** 2)
@@ -83,9 +83,41 @@ export function createRoof(): THREE.Group {
     group.add(rb)
   }
 
-  // 2) 瓦片 — 搭在椽条上方, 同坡度
-  const tileBaseZ = frontWallExt
-  const tileBackZ = backWallExt + overhang
+  // 2) 檩条 + 顶梁 — 在椽条下方, 成对出现, 依坡度定高
+  const purlinMat = new THREE.MeshStandardMaterial({ color: 0x6b4c1e, roughness: 0.6 })
+  const purlinH = 0.10
+  const purlinCount = 3
+  const wallGap = 0.10  // 墙头处向内偏移, 避免嵌入墙体
+  // 前坡: 从墙内侧到屋脊前, 均匀分布
+  const frontSpan = rafterRidgeZ - rafterStartZ - wallGap
+  const frontStep = frontSpan / (purlinCount - 0.5)
+  for (let i = 0; i < purlinCount; i++) {
+    const zf = rafterStartZ + wallGap + i * frontStep
+    const yf = wallTopY + (zf - rafterStartZ) * Math.tan(roofAngle) - purlinH / 2
+    const pf = new THREE.Mesh(new THREE.BoxGeometry(interiorW, purlinH, 0.08), purlinMat)
+    pf.position.set(totalX / 2, yf, zf)
+    group.add(pf)
+  }
+  const backSpan = rafterEndZ - rafterRidgeZ - wallGap
+  const backStep = backSpan / (purlinCount - 0.5)
+  for (let i = 0; i < purlinCount; i++) {
+    const zb = rafterEndZ - wallGap - i * backStep
+    const yb = wallTopY + (rafterEndZ - zb) * Math.tan(roofAngle) - purlinH / 2
+    const pb = new THREE.Mesh(new THREE.BoxGeometry(interiorW, purlinH, 0.08), purlinMat)
+    pb.position.set(totalX / 2, yb, zb)
+    group.add(pb)
+  }
+
+  // 顶梁(屋脊梁) — ridge正下方, 顶面贴椽底
+  const ridgeBottom = wallTopY + (rafterRidgeZ - rafterStartZ) * Math.tan(roofAngle)
+  const beamGeo = new THREE.BoxGeometry(interiorW, 0.18, 0.14)
+  const beam = new THREE.Mesh(beamGeo, purlinMat)
+  beam.position.set(totalX / 2, ridgeBottom - 0.09, rafterRidgeZ)
+  group.add(beam)
+
+  // 3) 瓦片 — 搭在椽条上方, 同坡度
+  const tileBaseZ = wallAB_SW
+  const tileBackZ = wallNE_NE + overhang
   const tileRidgeZ = rafterRidgeZ                            // 瓦片屋脊与椽条对齐
   const tileRidgeTop = rafterTopAtRidge + TILE_THICK
   const tileRidgeBot = rafterTopAtRidge
