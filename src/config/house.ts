@@ -16,7 +16,7 @@ export const DIMENSIONS = {
   zoneA: {
     length: 2.9,       // Z轴深度
     wallHeight: 3.15,  // 墙体高度
-    parapetHeight: 0.9,// 天台围栏高度
+    parapetHeight: 0.2, // 天台围栏高度
   },
 
   /** B区 - 中间主屋 */
