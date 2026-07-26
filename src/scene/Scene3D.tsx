@@ -176,7 +176,9 @@ export default function Scene3D({ onCameraReady }: Props) {
     function enterTour() {
       setTourMode(true)
       controls.enabled = false
-      camera.position.set(doorCenterX, 1.6, WL + 0.5)  // 门内0.5米
+      camera.position.set(doorCenterX, 1.6, WL + 0.5)
+      // requestPointerLock 必须由用户手势直接触发
+      document.body.requestPointerLock()
       firstPerson.enable()
     }
 
@@ -284,7 +286,7 @@ export default function Scene3D({ onCameraReady }: Props) {
 
       {/* 漫游操作提示 */}
       {tourMode && (
-        <div className="absolute top-20 right-4 z-10 bg-black/60 text-white/80 rounded-lg px-4 py-3 text-xs leading-relaxed hidden md:block">
+        <div className="absolute top-32 right-4 z-10 bg-black/60 text-white/80 rounded-lg px-4 py-3 text-xs leading-relaxed hidden md:block">
           <p className="font-bold mb-1">移动</p>
           <p>W A S D / ↑ ← ↓ →</p>
           <p className="font-bold mt-2 mb-1">环顾</p>

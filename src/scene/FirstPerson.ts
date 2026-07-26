@@ -12,6 +12,7 @@ export class FirstPerson {
   camera: THREE.PerspectiveCamera
   private domElement: HTMLElement
   private enabled = false
+  private wasLocked = false
   private euler = new THREE.Euler(0, 0, 0, 'YXZ')
   private velocity = new THREE.Vector3()
   private direction = new THREE.Vector3()
@@ -35,9 +36,8 @@ export class FirstPerson {
   }
 
   enable() {
-    if (this.enabled) return  // re-entrancy guard
+    if (this.enabled) return
     this.enabled = true
-    this.domElement.requestPointerLock()
     document.addEventListener('keydown', this.onKeyDown)
     document.addEventListener('keyup', this.onKeyUp)
     document.addEventListener('mousemove', this.onMouseMove)
@@ -46,6 +46,7 @@ export class FirstPerson {
 
   disable() {
     this.enabled = false
+    this.wasLocked = false
     document.exitPointerLock()
     document.removeEventListener('keydown', this.onKeyDown)
     document.removeEventListener('keyup', this.onKeyUp)
@@ -109,7 +110,7 @@ export class FirstPerson {
   private onKeyUp = (e: KeyboardEvent) => { this.keys.delete(e.code) }
 
   private onMouseMove = (e: MouseEvent) => {
-    if (!this.enabled) return
+    if (!this.enabled || typeof e.movementX !== 'number') return
     this.euler.setFromQuaternion(this.camera.quaternion)
     this.euler.y -= e.movementX * MOUSE_SENSITIVITY
     this.euler.x -= e.movementY * MOUSE_SENSITIVITY
@@ -118,7 +119,13 @@ export class FirstPerson {
   }
 
   private onPointerLockChange = () => {
-    if (document.pointerLockElement !== this.domElement) {
+    if (document.pointerLockElement) {
+      this.wasLocked = true
+      return
+    }
+    // 仅当之前锁定成功后才视为用户主动退出
+    if (this.wasLocked) {
+      this.wasLocked = false
       this.enabled = false
       document.removeEventListener('keydown', this.onKeyDown)
       document.removeEventListener('keyup', this.onKeyUp)
