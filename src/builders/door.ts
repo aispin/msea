@@ -1,12 +1,10 @@
 import * as THREE from 'three'
-import { DIMENSIONS, COLORS } from '../config/house'
+import { DIMENSIONS } from '../config/house'
 import { createWoodMaterial } from '../materials'
 
 export function createDoor(): THREE.Group {
   const group = new THREE.Group()
   const woodMat = createWoodMaterial()
-  // 门把手用 BasicMaterial — 无光照，完全固定视觉，不会因高光产生"飘动"错觉
-  const pullMat = new THREE.MeshBasicMaterial({ color: COLORS.doorRing })
 
   const doorW = DIMENSIONS.door.width    // 1.0m total
   const doorH = DIMENSIONS.door.height    // 2.1m
@@ -48,16 +46,20 @@ export function createDoor(): THREE.Group {
   rightFrame.position.set(doorCenterX + doorW / 2 + frameThick / 2, doorH / 2, doorT / 2)
   group.add(rightFrame)
 
-  // 门把手 — 子节点添加到门扇本地空间，与门板绝对固定
-  const pullGeo = new THREE.BoxGeometry(0.04, 0.08, 0.015)
-  // 左门把手 — 在左门扇本地坐标 (原点在门扇几何中心)
-  const pullLeft = new THREE.Mesh(pullGeo, pullMat)
-  pullLeft.position.set(-halfW * 0.15, 0, doorT / 2 + 0.007)
-  leftDoor.add(pullLeft)
-  // 右门把手
-  const pullRight = new THREE.Mesh(pullGeo, pullMat)
-  pullRight.position.set(halfW * 0.15, 0, doorT / 2 + 0.007)
-  rightDoor.add(pullRight)
+  // 门把手 — 当墙体实体处理，尺寸放大到建筑尺度，与门外框材质一致
+  const pullW = 0.08   // 宽8cm
+  const pullH = 0.15   // 高15cm
+  const pullD = 0.04   // 厚4cm(突出门外)
+  const pullGeo = new THREE.BoxGeometry(pullW, pullH, pullD)
+  for (const side of [-1, 1]) {
+    const px = doorCenterX + side * halfW * 0.55
+    const py = doorH * 0.55
+    const pz = doorT / 2 + pullD / 2  // 一半厚度在门外
+    const pull = new THREE.Mesh(pullGeo, woodMat)  // 用门框木材材质，与墙体同为MeshStandardMaterial
+    pull.position.set(px, py, pz)
+    pull.castShadow = true
+    group.add(pull)  // 直接加入门group，与门扇平级，都是建筑实体
+  }
 
   // 门放置在 SW墙 z=0 处
   group.position.set(0, 0, 0)
