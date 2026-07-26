@@ -52,6 +52,30 @@ src/
 - `rotation.y = -π/2`：`centerZ = position.z + width/2`
 
 **常见陷阱**：公式里 `width/2` 的正负号取决于旋转方向，用反会导致整窗偏移一个窗宽。
+
+## 屋顶几何
+
+屋顶斜率由内净尺寸决定，瓦片和椽条共用同一斜率：
+
+```
+triH = ridgeH - eaveH = 1.85m (屋脊到檐口高差)
+roofLen = 5.55m (B+C内净总长, lB+lC)
+roofAngle = atan2(triH, roofLen/2) ≈ 33.7°
+```
+
+**瓦片(外层)**：覆盖含出挑的完整屋顶。Z 跨度 = roofLen + 2×overhang + WL。
+- 使用自定义 BufferGeometry (8顶点) 构建 3cm 厚壳
+- 前坡: eaveZ = zStart - WL/2 - overhang, ridgeZ = eaveZ + halfSpan
+- 后坡: eaveZ = tileBaseZ + roofLenWithOverhang, ridgeZ 同前坡
+
+**椽条(内层)**：墙到墙，搁在 A-B 墙和 NE 墙上。
+- 水平半跨 = roofLen/2 = 2.775m (不是 roofLenWithOverhang/2)
+- 坡面实长 = sqrt((roofLen/2)² + triH²)
+- 截面尺寸: BoxGeometry(0.06, 0.10, slopeLen)，X=宽6cm, Y=高10cm
+- 旋转后 Y 分量 = rafterHalfH × cos(roofAngle) ≈ 4.2cm
+- 中心 Y = (eaveH + triH/2) - TILE_THICK - rafterHalfH×cos(angle)
+
+**关键**：瓦片和椽条使用不同的水平半跨（瓦片含出挑，椽条不含），但斜率相同。
 - 所有材质程序生成，无外部纹理文件
 - `npm run build` = `tsc -b && vite build`
 - Tailwind 入口: `src/index.css` 中用 `@import "tailwindcss"`（无 `@tailwind` 指令）
