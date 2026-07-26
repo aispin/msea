@@ -37,6 +37,7 @@ export class FirstPerson {
   }
 
   enable() {
+    if (this.enabled) return  // re-entrancy guard
     this.enabled = true
     this.domElement.requestPointerLock()
     document.addEventListener('keydown', this.onKeyDown)
