@@ -1,10 +1,15 @@
 import * as THREE from 'three'
-import { DIMENSIONS } from '../config/house'
+import { DIMENSIONS, COLORS } from '../config/house'
 import { createWoodMaterial } from '../materials'
 
 export function createDoor(): THREE.Group {
   const group = new THREE.Group()
   const woodMat = createWoodMaterial()
+  const metalMat = new THREE.MeshStandardMaterial({
+    color: COLORS.doorRing,
+    roughness: 0.3,
+    metalness: 0.9,
+  })
 
   const doorW = DIMENSIONS.door.width    // 1.0m total
   const doorH = DIMENSIONS.door.height    // 2.1m
@@ -46,7 +51,24 @@ export function createDoor(): THREE.Group {
   rightFrame.position.set(doorCenterX + doorW / 2 + frameThick / 2, doorH / 2, doorT / 2)
   group.add(rightFrame)
 
-  // 门锁 — 先去掉排查根因。确认门本身正常后再加回。
+  // 门锁 — 金属底座+门环，贴在门板表面
+  const baseGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.006, 16)
+  const ringGeo = new THREE.TorusGeometry(0.018, 0.005, 8, 12)
+
+  for (const side of [-1, 1]) {
+    const lx = doorCenterX + side * halfW * 0.55
+    const ly = doorH * 0.55
+    const lz = doorT / 2
+
+    const base = new THREE.Mesh(baseGeo, metalMat)
+    base.rotation.x = Math.PI / 2
+    base.position.set(lx, ly, lz)
+    group.add(base)
+
+    const ring = new THREE.Mesh(ringGeo, metalMat)
+    ring.position.set(lx, ly - 0.025, lz)
+    group.add(ring)
+  }
 
   // 门放置在 SW墙 z=0 处
   group.position.set(0, 0, 0)
