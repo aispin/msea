@@ -9,10 +9,10 @@ const totalZ = ZONE_OFFSETS.totalLength
 const eaveH = DIMENSIONS.roof.eaveHeight
 const ridgeH = DIMENSIONS.roof.ridgeHeight
 
-// 标注位置 — 基于NW墙外表面(X=0)
+// 标注位置 — 过道在+X侧(aisle.position.x = totalX + margin/2 ≈ 5.86)
 const DIM_OFFSET = 0.08
-const DIM_X = -DIM_OFFSET          // 尺寸线X
-const DIM_LABEL_X = -DIM_OFFSET - 0.15  // 文本X(更外)
+const DIM_X = DIM_OFFSET            // 尺寸线X (过道侧=+X)
+const DIM_LABEL_X = DIM_OFFSET + 0.15  // 文本X(更外)
 
 function dimLine(points: THREE.Vector3[]): THREE.Line {
   const geo = new THREE.BufferGeometry().setFromPoints(points)
