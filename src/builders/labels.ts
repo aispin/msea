@@ -37,11 +37,12 @@ export function createLabels(): THREE.Group {
   const cz = zEnd / 2
   const dist = Math.max(zEnd, totalX) / 2 + margin
   const cos45 = Math.SQRT1_2
+  // N=(-X,+Z)=NW+NE之间; E=(+X,+Z)=SE+NE之间; S=(+X,-Z); W=(-X,-Z)
   const dirs: [string, number, number][] = [
-    ['N', cx + dist * cos45, cz + dist * cos45],
-    ['S', cx - dist * cos45, cz - dist * cos45],
-    ['E', cx - dist * cos45, cz + dist * cos45],
-    ['W', cx + dist * cos45, cz - dist * cos45],
+    ['N', cx - dist * cos45, cz + dist * cos45],
+    ['S', cx + dist * cos45, cz - dist * cos45],
+    ['E', cx + dist * cos45, cz + dist * cos45],
+    ['W', cx - dist * cos45, cz - dist * cos45],
   ]
   for (const [text, x, z] of dirs) {
     const s = makeSprite(text, 56, 0x1a1a2e)

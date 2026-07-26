@@ -67,8 +67,7 @@ export default function Compass({ camera }: CompassProps) {
         ctx.fillText(label, dx, dy)
       }
 
-      // 长指针 — 始终指向上方(罗盘0°=相机朝向)
-      // N/E/S/W 标签随相机旋转，指针固定即可指示相机相对方向
+      // 长指针 — 红端始终指向相机朝向(罗盘顶部0°)
       const needleAngle = 0
 
       ctx.save()
