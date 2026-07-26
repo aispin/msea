@@ -71,7 +71,7 @@ export function createDimensions(): THREE.Group {
 
   const winW = DIMENSIONS.window.width, winH = DIMENSIONS.window.height
   const winBZ = zB + (lB + DIMENSIONS.zoneC.length) / 4
-  group.add(dimText(`窗${winW.toFixed(1)}×${winH.toFixed(1)}m`, new THREE.Vector3(DIM_LABEL_X, 0.6, winBZ), 0.45))
+  group.add(dimText(`窗${winW.toFixed(1)}×${winH.toFixed(1)}m`, new THREE.Vector3(DIM_LABEL_X, DIMENSIONS.window.sillHeight - 0.1, winBZ), 0.45))
 
   return group
 }
