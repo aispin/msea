@@ -36,7 +36,7 @@ function dimText(text: string, pos: THREE.Vector3, scale = 0.6): THREE.Sprite {
 
 export function createDimensions(): THREE.Group {
   const group = new THREE.Group()
-  const d = 0.08  // 尺寸线离建筑距离(贴近墙面)
+  const d = -0.08  // 尺寸线 — 负X=邻居侧? 测试
 
   // ─── 总长 — NW侧(+X)地面 ────────────────────────
   group.add(dimLine([new THREE.Vector3(d, 0.02, 0), new THREE.Vector3(d, 0.02, totalZ)]))
@@ -54,7 +54,7 @@ export function createDimensions(): THREE.Group {
   const lB = DIMENSIONS.zoneB.length
   const lC = DIMENSIONS.zoneC.length
 
-  const segY = 0.02; const segX = d
+  const segY = 0.02; const segX = -0.08
   const makeSeg = (z0: number, len: number, label: string) => {
     group.add(dimLine([new THREE.Vector3(segX, segY, z0), new THREE.Vector3(segX, segY, z0 + len)]))
     group.add(dimText(`${label}: ${len.toFixed(2)}m`, new THREE.Vector3(segX, 0.15, z0 + len / 2), 0.5))
@@ -62,7 +62,7 @@ export function createDimensions(): THREE.Group {
   makeSeg(zA, lA, 'A区'); makeSeg(zB, lB, 'B区'); makeSeg(zC, lC, 'C区')
 
   // ─── 总高 — NW墙外屋脊处 ──────────────────────
-  const hxNW = 0.05  // 贴近NW墙面
+  const hxNW = -0.05
   const wallAB = ZONE_OFFSETS.zoneBStart - WL / 2
   const wallNE = ZONE_OFFSETS.zoneBStart + DIMENSIONS.roof.totalLength + WL
   const hzRidge = (wallAB + wallNE) / 2  // 屋脊Z (精确)
@@ -86,7 +86,7 @@ export function createDimensions(): THREE.Group {
   // ─── 窗户尺寸 — NW侧 ─────────────────────────────
   const winW = DIMENSIONS.window.width; const winH = DIMENSIONS.window.height
   const winBZ = zB + (lB + DIMENSIONS.zoneC.length) / 4
-  group.add(dimText(`窗${winW.toFixed(1)}×${winH.toFixed(1)}m`, new THREE.Vector3(0.05, 0.6, winBZ), 0.45))
+  group.add(dimText(`窗${winW.toFixed(1)}×${winH.toFixed(1)}m`, new THREE.Vector3(-0.05, 0.6, winBZ), 0.45))
 
   return group
 }
