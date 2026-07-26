@@ -36,7 +36,7 @@ function dimText(text: string, pos: THREE.Vector3, scale = 0.6): THREE.Sprite {
 
 export function createDimensions(): THREE.Group {
   const group = new THREE.Group()
-  const d = 0.6  // 尺寸线离建筑距离
+  const d = 0.08  // 尺寸线离建筑距离(贴近墙面)
 
   // ─── 总长 — NW侧(+X)地面 ────────────────────────
   group.add(dimLine([new THREE.Vector3(d, 0.02, 0), new THREE.Vector3(d, 0.02, totalZ)]))
@@ -62,14 +62,14 @@ export function createDimensions(): THREE.Group {
   makeSeg(zA, lA, 'A区'); makeSeg(zB, lB, 'B区'); makeSeg(zC, lC, 'C区')
 
   // ─── 总高 — NW墙外屋脊处 ──────────────────────
-  const hxNW = 0.3
+  const hxNW = 0.05  // 贴近NW墙面
   const wallAB = ZONE_OFFSETS.zoneBStart - WL / 2
   const wallNE = ZONE_OFFSETS.zoneBStart + DIMENSIONS.roof.totalLength + WL
   const hzRidge = (wallAB + wallNE) / 2  // 屋脊Z (精确)
   group.add(dimLine([new THREE.Vector3(hxNW, 0, hzRidge), new THREE.Vector3(hxNW, eaveH, hzRidge)]))
-  group.add(dimText(`檐${eaveH.toFixed(2)}m`, new THREE.Vector3(hxNW - 0.2, eaveH / 2, hzRidge)))
+  group.add(dimText(`檐${eaveH.toFixed(2)}m`, new THREE.Vector3(hxNW + 0.15, eaveH / 2, hzRidge)))
   group.add(dimLine([new THREE.Vector3(hxNW, eaveH, hzRidge), new THREE.Vector3(hxNW, ridgeH, hzRidge)]))
-  group.add(dimText(`脊${ridgeH.toFixed(2)}m`, new THREE.Vector3(hxNW - 0.2, (eaveH + ridgeH) / 2, hzRidge)))
+  group.add(dimText(`脊${ridgeH.toFixed(2)}m`, new THREE.Vector3(hxNW + 0.15, (eaveH + ridgeH) / 2, hzRidge)))
 
   // ─── 入户门 — SW立面 ───────────────────────────
   const doorW = DIMENSIONS.door.width; const doorH = DIMENSIONS.door.height
