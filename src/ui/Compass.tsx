@@ -23,14 +23,13 @@ export default function Compass({ camera }: CompassProps) {
   useEffect(() => {
     const canvas = canvasRef.current!
     const ctx = canvas.getContext('2d')!
-    const size = 80
+    const size = 100
     canvas.width = size * 2
     canvas.height = size * 2
     const cx = size
     const cy = size
-    const r = size - 8
+    const r = size - 10
 
-    // 复用 Vector3 以避免每帧分配
     const camDir = new THREE.Vector3()
 
     function draw() {
@@ -41,16 +40,16 @@ export default function Compass({ camera }: CompassProps) {
       ctx.arc(cx, cy, r, 0, Math.PI * 2)
       ctx.fillStyle = hexToRgba(COLORS.compassBg, 0.85)
       ctx.fill()
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)'
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)'
       ctx.lineWidth = 2
       ctx.stroke()
 
-      // 计算相机方向 (XZ平面投影)
-      // 建筑坐标系: +Z=NE(45°), 真实N在-Z与+X之间即-π/4
+      // 相机朝向 (XZ平面)
       camera.getWorldDirection(camDir)
       const camAngle = Math.atan2(camDir.x, camDir.z)
 
-      // 方向标记 N/E/S/W (真实罗盘方向)
+      // N/E/S/W 标签 (真实罗盘方向，与地面方向标识一致)
+      // 建筑+Z=NE(45°), N在建筑坐标-π/4
       const dirs = [
         { label: 'N', angle: -Math.PI / 4 },
         { label: 'E', angle: Math.PI / 4 },
@@ -58,39 +57,56 @@ export default function Compass({ camera }: CompassProps) {
         { label: 'W', angle: -3 * Math.PI / 4 },
       ]
       ctx.fillStyle = hexToCss(COLORS.labelText)
-      ctx.font = 'bold 13px sans-serif'
+      ctx.font = 'bold 14px sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       for (const { label, angle } of dirs) {
-        const worldAngle = angle // N在世界中对应+Z方向
-        const displayAngle = worldAngle - camAngle
-
-        const dx = cx + Math.sin(displayAngle) * (r - 16)
-        const dy = cy - Math.cos(displayAngle) * (r - 16)
+        const displayAngle = angle - camAngle
+        const dx = cx + Math.sin(displayAngle) * (r - 18)
+        const dy = cy - Math.cos(displayAngle) * (r - 18)
         ctx.fillText(label, dx, dy)
       }
 
-      // 指针 (红色指向北, 灰色指向南) — 北在建筑坐标-π/4
+      // 长指针 — 从中心延伸，红端指北
       const needleAngle = -camAngle - Math.PI / 4
 
       ctx.save()
       ctx.translate(cx, cy)
       ctx.rotate(needleAngle)
+
+      // 红色北指针 (粗线 + 箭头)
+      const needleLen = r - 12
+      ctx.strokeStyle = hexToCss(COLORS.compassNeedle)
+      ctx.lineWidth = 3
       ctx.beginPath()
-      ctx.moveTo(0, -r + 12)
-      ctx.lineTo(-6, -r + 22)
-      ctx.lineTo(6, -r + 22)
-      ctx.closePath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(0, -needleLen)
+      ctx.stroke()
+
+      // 箭头 (三角形)
       ctx.fillStyle = hexToCss(COLORS.compassNeedle)
-      ctx.fill()
-      // 南端
       ctx.beginPath()
-      ctx.moveTo(0, r - 12)
-      ctx.lineTo(-4, r - 22)
-      ctx.lineTo(4, r - 22)
+      ctx.moveTo(0, -needleLen)
+      ctx.lineTo(-7, -needleLen + 14)
+      ctx.lineTo(7, -needleLen + 14)
       ctx.closePath()
-      ctx.fillStyle = '#888888'
       ctx.fill()
+
+      // 灰色南指针 (短线)
+      const southLen = r * 0.35
+      ctx.strokeStyle = '#888888'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(0, southLen)
+      ctx.stroke()
+
+      // 中心圆点
+      ctx.fillStyle = hexToCss(COLORS.compassNeedle)
+      ctx.beginPath()
+      ctx.arc(0, 0, 4, 0, Math.PI * 2)
+      ctx.fill()
+
       ctx.restore()
     }
 
@@ -108,7 +124,7 @@ export default function Compass({ camera }: CompassProps) {
     <canvas
       ref={canvasRef}
       className="absolute top-4 right-4 z-10"
-      style={{ width: 80, height: 80 }}
+      style={{ width: 100, height: 100 }}
     />
   )
 }
