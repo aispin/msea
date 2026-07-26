@@ -83,11 +83,10 @@ export function createDimensions(): THREE.Group {
   group.add(dimLine([new THREE.Vector3(dcx - iw / 2, ih + 0.1, iz), new THREE.Vector3(dcx + iw / 2, ih + 0.1, iz)]))
   group.add(dimText(`内门${iw.toFixed(2)}×${ih.toFixed(2)}m`, new THREE.Vector3(dcx, ih + 0.3, iz)))
 
-  // ─── 窗户尺寸 — B区窗下方 ───────────────────────
+  // ─── 窗户尺寸 — NW侧 ─────────────────────────────
   const winW = DIMENSIONS.window.width; const winH = DIMENSIONS.window.height
-  const winBZ = zB + (lB + DIMENSIONS.zoneC.length) / 4  // B区窗Z位置(前半居中)
-  group.add(dimText(`窗${winW.toFixed(1)}×${winH.toFixed(1)}m`, new THREE.Vector3(totalX + 0.05, 0.6, winBZ), 0.45))
-  group.add(dimText(`×3`, new THREE.Vector3(totalX + 0.05, 0.2, zB + (lB + lC) / 2), 0.4))
+  const winBZ = zB + (lB + DIMENSIONS.zoneC.length) / 4
+  group.add(dimText(`窗${winW.toFixed(1)}×${winH.toFixed(1)}m`, new THREE.Vector3(-0.05, 0.6, winBZ), 0.45))
 
   return group
 }
