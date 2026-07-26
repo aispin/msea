@@ -280,21 +280,22 @@ export default function Scene3D({ onCameraReady }: Props) {
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/50 text-white/70 px-5 py-2 rounded-full text-sm pointer-events-none select-none">按 ESC 退出漫游</div>
       )}
       {/* 操作提示 — 常驻 */}
-      <div className="absolute top-32 right-4 z-10 bg-black/60 text-white/80 rounded-lg px-4 py-3 text-xs leading-relaxed hidden md:block">
+      <div className="absolute top-32 right-4 z-10 bg-black/60 rounded-lg px-4 py-3 text-xs leading-relaxed hidden md:block">
         {tourMode ? (
           <>
-            <p className="font-bold mb-1">移动</p><p>W A S D / ↑ ← ↓ →</p>
-            <p className="font-bold mt-2 mb-1">环顾</p><p>移动鼠标</p>
-            <p className="font-bold mt-2 mb-1">退出</p><p>按 ESC 键</p>
+            <div className="flex items-center gap-2 mb-1"><span className="text-amber-400 font-bold text-[11px]">移动</span><span className="text-white/50">W A S D / ↑ ← ↓ →</span></div>
+            <div className="flex items-center gap-2 mb-1"><span className="text-amber-400 font-bold text-[11px]">环顾</span><span className="text-white/50">移动鼠标</span></div>
+            <div className="flex items-center gap-2"><span className="text-amber-400 font-bold text-[11px]">退出</span><span className="text-white/50">按 ESC 键</span></div>
           </>
         ) : (
           <>
-            <p className="font-bold mb-1">旋转</p><p>鼠标左键拖拽</p>
-            <p className="font-bold mt-2 mb-1">缩放</p><p>滚轮</p>
-            <p className="font-bold mt-2 mb-1">平移</p><p>鼠标中键拖拽</p>
+            <div className="flex items-center gap-2 mb-1"><span className="text-amber-400 font-bold text-[11px]">旋转</span><span className="text-white/50">鼠标左键拖拽</span></div>
+            <div className="flex items-center gap-2 mb-1"><span className="text-amber-400 font-bold text-[11px]">缩放</span><span className="text-white/50">滚轮</span></div>
+            <div className="flex items-center gap-2"><span className="text-amber-400 font-bold text-[11px]">平移</span><span className="text-white/50">鼠标中键拖拽</span></div>
           </>
         )}
-        <p className="font-bold mt-2 mb-1">标注</p><p>按 D 键 切换</p>
+        <div className="border-t border-white/20 my-1.5" />
+        <div className="flex items-center gap-2"><span className="text-amber-400 font-bold text-[11px]">标注</span><span className="text-white/50">按 D 键 切换</span></div>
       </div>
 
       {/* 移动端虚拟摇杆 + 环顾 (仅触摸设备) */}
