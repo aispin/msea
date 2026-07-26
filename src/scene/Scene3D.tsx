@@ -4,7 +4,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { LIGHTING, CAMERA } from '../config/house'
 import House from './House'
 
-export default function Scene3D() {
+interface Props {
+  onCameraReady: (camera: THREE.PerspectiveCamera) => void
+}
+
+export default function Scene3D({ onCameraReady }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<THREE.Scene | null>(null)
 
@@ -13,7 +17,6 @@ export default function Scene3D() {
     const w = container.clientWidth
     const h = container.clientHeight
 
-    // 渲染器
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(w, h)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -23,13 +26,10 @@ export default function Scene3D() {
     renderer.toneMappingExposure = 1.0
     container.appendChild(renderer.domElement)
 
-    // 场景
-    const s = new THREE.Scene()
-    s.background = new THREE.Color(0xd4e4f0) // 浅蓝天空色
-    s.fog = new THREE.Fog(0xd4e4f0, 20, 60)
-    setScene(s)
+    const threeScene = new THREE.Scene()
+    threeScene.background = new THREE.Color(0xd4e4f0)
+    threeScene.fog = new THREE.Fog(0xd4e4f0, 20, 60)
 
-    // 相机
     const camera = new THREE.PerspectiveCamera(
       CAMERA.fov, w / h, CAMERA.near, CAMERA.far
     )
@@ -51,22 +51,19 @@ export default function Scene3D() {
     dirLight.shadow.camera.right = 15
     dirLight.shadow.camera.top = 15
     dirLight.shadow.camera.bottom = -15
-    s.add(dirLight)
+    threeScene.add(dirLight)
 
-    const ambLight = new THREE.AmbientLight(
+    threeScene.add(new THREE.AmbientLight(
       LIGHTING.ambient.color,
       LIGHTING.ambient.intensity
-    )
-    s.add(ambLight)
-
-    const hemiLight = new THREE.HemisphereLight(
+    ))
+    threeScene.add(new THREE.HemisphereLight(
       LIGHTING.hemisphere.skyColor,
       LIGHTING.hemisphere.groundColor,
       LIGHTING.hemisphere.intensity
-    )
-    s.add(hemiLight)
+    ))
 
-    // OrbitControls
+    // Controls
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.target.set(...CAMERA.lookAt)
     controls.minDistance = CAMERA.minDistance
@@ -79,16 +76,16 @@ export default function Scene3D() {
     }
     controls.update()
 
-    // 动画循环
+    onCameraReady(camera)
+
     let animId: number
     function animate() {
       animId = requestAnimationFrame(animate)
       controls.update()
-      renderer.render(s, camera)
+      renderer.render(threeScene, camera)
     }
     animate()
 
-    // 自适应 resize
     function onResize() {
       const cw = container.clientWidth
       const ch = container.clientHeight
@@ -98,7 +95,8 @@ export default function Scene3D() {
     }
     window.addEventListener('resize', onResize)
 
-    // 清理
+    setScene(threeScene)
+
     return () => {
       cancelAnimationFrame(animId)
       window.removeEventListener('resize', onResize)
@@ -106,7 +104,7 @@ export default function Scene3D() {
       renderer.dispose()
       container.removeChild(renderer.domElement)
     }
-  }, [])
+  }, [onCameraReady])
 
   return (
     <>
