@@ -9,11 +9,6 @@ export function createDoor(): THREE.Group {
     color: COLORS.doorRing,
     roughness: 0.3,
     metalness: 0.9,
-    depthTest: true,
-    depthWrite: true,
-    polygonOffset: true,
-    polygonOffsetFactor: -2,
-    polygonOffsetUnits: -2,
   })
 
   const doorW = DIMENSIONS.door.width    // 1.0m total
@@ -56,22 +51,24 @@ export function createDoor(): THREE.Group {
   rightFrame.position.set(doorCenterX + doorW / 2 + frameThick / 2, doorH / 2, doorT / 2)
   group.add(rightFrame)
 
-  // 门锁 — 金属底座+门环，半嵌入门板(突出2mm)
-  const baseGeo = new THREE.CylinderGeometry(0.035, 0.035, 0.008, 16)
-  const ringGeo = new THREE.TorusGeometry(0.025, 0.008, 8, 16)
+  // 门锁 — 金属底座+门环
+  const baseGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.01, 16)
+  const ringGeo = new THREE.TorusGeometry(0.022, 0.006, 8, 16)
 
   for (const side of [-1, 1]) {
     const lx = doorCenterX + side * halfW * 0.55
     const ly = doorH * 0.55
-    const lz = doorT / 2 + 0.002  // 略微突出门面避免z-fighting
+    const lz = doorT / 2 + 0.005  // 5mm突出避免z-fighting
 
     const base = new THREE.Mesh(baseGeo, metalMat)
     base.rotation.x = Math.PI / 2
     base.position.set(lx, ly, lz)
+    base.renderOrder = 1
     group.add(base)
 
     const ring = new THREE.Mesh(ringGeo, metalMat)
-    ring.position.set(lx, ly - 0.035, lz)
+    ring.position.set(lx, ly - 0.03, lz)
+    ring.renderOrder = 1
     group.add(ring)
   }
 
