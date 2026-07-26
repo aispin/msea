@@ -74,11 +74,6 @@ export function createLabels(): THREE.Group {
     group.add(sprite)
   }
 
-  // 入口标识 🚪 — 放在门前地面上，远离门板避免视觉混淆
-  const doorLabel = createTextSprite('\u{1F6AA}', 64, 0x000000)
-  doorLabel.position.set(HW / 2, 0.15, -1.5)
-  doorLabel.scale.set(0.8, 0.8, 1)
-  group.add(doorLabel)
 
   return group
 }
