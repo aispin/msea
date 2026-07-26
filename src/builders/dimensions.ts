@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
-import { aisleX, neighborX, frontZ, centerX } from '../utils/screen'
+import { aisleX, centerX, frontZ, neighborX } from '../utils/screen'
 
-const DIM_COLOR = 0xffd700
+const DIM_COLOR = 0xFFD700
 const WL = 0.15
 const totalX = WL + DIMENSIONS.houseWidth + WL
 const totalZ = ZONE_OFFSETS.totalLength
@@ -44,8 +44,8 @@ export function createDimensions(): THREE.Group {
   group.add(dimLine([new THREE.Vector3(0, 0.02, frontZOff), new THREE.Vector3(totalX, 0.02, frontZOff)]))
   group.add(dimText(`${totalX.toFixed(2)}m`, new THREE.Vector3(centerX(), 0.15, frontZ(DIM_OFFSET + 0.15))))
 
-  const zA = ZONE_OFFSETS.zoneAStart, zB = ZONE_OFFSETS.zoneBStart, zC = ZONE_OFFSETS.zoneCStart
-  const lA = DIMENSIONS.zoneA.length, lB = DIMENSIONS.zoneB.length, lC = DIMENSIONS.zoneC.length
+  const zA = ZONE_OFFSETS.zoneAStart; const zB = ZONE_OFFSETS.zoneBStart; const zC = ZONE_OFFSETS.zoneCStart
+  const lA = DIMENSIONS.zoneA.length; const lB = DIMENSIONS.zoneB.length; const lC = DIMENSIONS.zoneC.length
   const mk = (z0: number, len: number, label: string) => {
     group.add(dimLine([new THREE.Vector3(DIM_X, 0.02, z0), new THREE.Vector3(DIM_X, 0.02, z0 + len)]))
     group.add(dimText(`${label}: ${len.toFixed(2)}m`, new THREE.Vector3(DIM_LABEL_X, 0.15, z0 + len / 2), 0.5))
@@ -60,16 +60,16 @@ export function createDimensions(): THREE.Group {
   group.add(dimLine([new THREE.Vector3(DIM_X, eaveH, hzRidge), new THREE.Vector3(DIM_X, ridgeH, hzRidge)]))
   group.add(dimText(`脊${ridgeH.toFixed(2)}m`, new THREE.Vector3(DIM_LABEL_X, (eaveH + ridgeH) / 2, hzRidge)))
 
-  const doorW = DIMENSIONS.door.width, doorH = DIMENSIONS.door.height, dcx = totalX / 2
+  const doorW = DIMENSIONS.door.width; const doorH = DIMENSIONS.door.height; const dcx = totalX / 2
   group.add(dimLine([new THREE.Vector3(dcx - doorW / 2, doorH + 0.1, 0), new THREE.Vector3(dcx + doorW / 2, doorH + 0.1, 0)]))
   group.add(dimText(`外门${doorW.toFixed(2)}×${doorH.toFixed(2)}m`, new THREE.Vector3(dcx, doorH + 0.3, -0.1)))
 
-  const iw = DIMENSIONS.door.innerWidth, ih = DIMENSIONS.door.innerHeight
+  const iw = DIMENSIONS.door.innerWidth; const ih = DIMENSIONS.door.innerHeight
   const iz = ZONE_OFFSETS.zoneBStart - WL / 2
   group.add(dimLine([new THREE.Vector3(dcx - iw / 2, ih + 0.1, iz), new THREE.Vector3(dcx + iw / 2, ih + 0.1, iz)]))
   group.add(dimText(`内门${iw.toFixed(2)}×${ih.toFixed(2)}m`, new THREE.Vector3(dcx, ih + 0.3, iz)))
 
-  const winW = DIMENSIONS.window.width, winH = DIMENSIONS.window.height
+  const winW = DIMENSIONS.window.width; const winH = DIMENSIONS.window.height
   const winBZ = zB + (lB + DIMENSIONS.zoneC.length) / 4
   group.add(dimText(`窗${winW.toFixed(1)}×${winH.toFixed(1)}m`, new THREE.Vector3(DIM_LABEL_X, DIMENSIONS.window.sillHeight - 0.1, winBZ), 0.45))
 

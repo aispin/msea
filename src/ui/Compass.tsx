@@ -1,12 +1,12 @@
+import type * as THREE from 'three'
 import { useEffect, useRef } from 'react'
-import * as THREE from 'three'
 import { COLORS, DIMENSIONS, ZONE_OFFSETS } from '../config/house'
 
 interface CompassProps { camera: THREE.Camera }
 
 function hexToCss(hex: number): string { return `#${hex.toString(16).padStart(6, '0')}` }
 function hexToRgba(hex: number, alpha: number): string {
-  const r = (hex >> 16) & 0xff, g = (hex >> 8) & 0xff, b = hex & 0xff
+  const r = (hex >> 16) & 0xFF; const g = (hex >> 8) & 0xFF; const b = hex & 0xFF
   return `rgba(${r},${g},${b},${alpha})`
 }
 
@@ -32,7 +32,7 @@ export default function Compass({ camera }: CompassProps) {
     const ctx = canvas.getContext('2d')!
     const size = 100
     canvas.width = size * 2; canvas.height = size * 2
-    const cx = size, cy = size, r = size - 10
+    const cx = size; const cy = size; const r = size - 10
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -42,13 +42,13 @@ export default function Compass({ camera }: CompassProps) {
 
       const camAngle = Math.atan2(camera.position.x - centerX, camera.position.z - centerZ) + Math.PI
 
-      const dirs: [string, number][] = [['N', -Math.PI/4], ['E', Math.PI/4], ['S', 3*Math.PI/4], ['W', -3*Math.PI/4]]
+      const dirs: [string, number][] = [['N', -Math.PI / 4], ['E', Math.PI / 4], ['S', 3 * Math.PI / 4], ['W', -3 * Math.PI / 4]]
       ctx.fillStyle = hexToCss(COLORS.labelText)
       ctx.font = 'bold 14px sans-serif'
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
       for (const [label, angle] of dirs) {
         const a = angle + camAngle
-        ctx.fillText(label, cx + Math.sin(a)*(r-18), cy - Math.cos(a)*(r-18))
+        ctx.fillText(label, cx + Math.sin(a) * (r - 18), cy - Math.cos(a) * (r - 18))
       }
 
       ctx.save(); ctx.translate(cx, cy)
@@ -56,8 +56,8 @@ export default function Compass({ camera }: CompassProps) {
       ctx.strokeStyle = hexToCss(COLORS.compassNeedle); ctx.lineWidth = 3
       ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -nl); ctx.stroke()
       ctx.fillStyle = hexToCss(COLORS.compassNeedle)
-      ctx.beginPath(); ctx.moveTo(0, -nl); ctx.lineTo(-7, -nl+14); ctx.lineTo(7, -nl+14); ctx.closePath(); ctx.fill()
-      ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI*2); ctx.fill()
+      ctx.beginPath(); ctx.moveTo(0, -nl); ctx.lineTo(-7, -nl + 14); ctx.lineTo(7, -nl + 14); ctx.closePath(); ctx.fill()
+      ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill()
       ctx.restore()
     }
 
@@ -67,5 +67,5 @@ export default function Compass({ camera }: CompassProps) {
     return () => cancelAnimationFrame(id)
   }, [camera])
 
-  return <canvas ref={canvasRef} className="absolute top-4 right-4 z-10" style={{ width:100, height:100 }} />
+  return <canvas ref={canvasRef} className="absolute top-4 right-4 z-10" style={{ width: 100, height: 100 }} />
 }

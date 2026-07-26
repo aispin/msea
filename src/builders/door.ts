@@ -6,14 +6,14 @@ export function createDoor(): THREE.Group {
   const group = new THREE.Group()
   const woodMat = createWoodMaterial()
 
-  const doorW = DIMENSIONS.door.width    // 1.0m total
-  const doorH = DIMENSIONS.door.height    // 2.1m
+  const doorW = DIMENSIONS.door.width // 1.0m total
+  const doorH = DIMENSIONS.door.height // 2.1m
   const doorT = DIMENSIONS.door.thickness // 0.08m
-  const halfW = doorW / 2                 // 0.5m per leaf
+  const halfW = doorW / 2 // 0.5m per leaf
 
-  const WL = 0.15  // 墙厚
-  const totalX = WL + DIMENSIONS.houseWidth + WL  // 建筑总宽
-  const doorCenterX = totalX / 2  // 门在SW墙正中
+  const WL = 0.15 // 墙厚
+  const totalX = WL + DIMENSIONS.houseWidth + WL // 建筑总宽
+  const doorCenterX = totalX / 2 // 门在SW墙正中
 
   // 左扇门
   const leftGeo = new THREE.BoxGeometry(halfW - 0.01, doorH, doorT)
@@ -47,13 +47,16 @@ export function createDoor(): THREE.Group {
   rightFrame.position.set(doorCenterX + doorW / 2 + frameThick / 2, doorH / 2, doorT / 2)
   group.add(rightFrame)
 
-
   // 门锁 — 4组（每扇门里外各一），圆形黑色底座 + 金属门环
   const blackMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1a1a, roughness: 0.6, metalness: 0.2,
+    color: 0x1A1A1A,
+    roughness: 0.6,
+    metalness: 0.2,
   })
   const ringMat = new THREE.MeshStandardMaterial({
-    color: 0xc9a96e, roughness: 0.3, metalness: 0.9,
+    color: 0xC9A96E,
+    roughness: 0.3,
+    metalness: 0.9,
   })
   const baseGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.012, 16)
   const ringGeo = new THREE.TorusGeometry(0.035, 0.01, 8, 16)

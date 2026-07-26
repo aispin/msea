@@ -43,17 +43,15 @@ export function createRoof(): THREE.Group {
   // 椽条顶面与墙顶平齐 → 无缝防水
   const rafterTopAtWall = eaveH
   const rafterCenterAtWall = rafterTopAtWall - rafterDY
-  const rafterBottomAtWall = rafterTopAtWall - 2 * rafterDY
   // 椽条覆盖全墙厚(外墙到外墙)
   const rafterStartZ = wallAB_SW
-  const rafterEndZ   = wallNE_NE
+  const rafterEndZ = wallNE_NE
   const ridgeZ = (wallAB_SW + wallNE_NE) / 2
-  const rafterTopAtRidge = rafterTopAtWall + (ridgeZ - rafterStartZ) * Math.tan(roofAngle)
-
   // ─── 联动函数 ────────────────────────────────────────
   /** 椽条中心Y @ Z */
   function rafterCY(z: number): number {
-    if (z <= ridgeZ) return rafterCenterAtWall + (z - rafterStartZ) * Math.tan(roofAngle)
+    if (z <= ridgeZ)
+      return rafterCenterAtWall + (z - rafterStartZ) * Math.tan(roofAngle)
     return rafterCenterAtWall + (rafterEndZ - z) * Math.tan(roofAngle)
   }
   /** 椽条顶面Y */
@@ -65,13 +63,13 @@ export function createRoof(): THREE.Group {
   /** 瓦片顶面Y */
   function tileTopY(z: number): number { return tileBotY(z) + TILE_THICK }
   /** 檩条中心Y */
-  function purlinCY(z: number): number { return rafterBotY(z) - 0.05 }  // purlinH/2 = 0.05
+  function purlinCY(z: number): number { return rafterBotY(z) - 0.05 } // purlinH/2 = 0.05
 
   // ─── 1) 椽条 ─────────────────────────────────────────
   const interiorW = HW
   const halfRafter = (rafterEndZ - rafterStartZ) / 2
   const rafterLen = Math.sqrt(halfRafter ** 2 + triH ** 2)
-  const rafterMat = new THREE.MeshStandardMaterial({ color: 0x8b6914, roughness: 0.7 })
+  const rafterMat = new THREE.MeshStandardMaterial({ color: 0x8B6914, roughness: 0.7 })
   const rafterCount = Math.ceil(interiorW / 0.4)
   const rafterGeo = new THREE.BoxGeometry(0.06, 0.10, rafterLen)
 
@@ -92,10 +90,10 @@ export function createRoof(): THREE.Group {
   }
 
   // ─── 2) 檩条 + 屋脊梁 ──────────────────────────────
-  const purlinMat = new THREE.MeshStandardMaterial({ color: 0x6b4c1e, roughness: 0.6 })
+  const purlinMat = new THREE.MeshStandardMaterial({ color: 0x6B4C1E, roughness: 0.6 })
   const purlinCount = 3
   const frontSpan = ridgeZ - rafterStartZ
-  const backSpan  = rafterEndZ - ridgeZ
+  const backSpan = rafterEndZ - ridgeZ
   for (let i = 0; i < purlinCount; i++) {
     const zf = rafterStartZ + ((i + 1) / (purlinCount + 1)) * frontSpan
     const pf = new THREE.Mesh(new THREE.BoxGeometry(interiorW, 0.10, 0.08), purlinMat)
@@ -118,23 +116,76 @@ export function createRoof(): THREE.Group {
   const tileRidgeTop = tileTopY(ridgeZ)
   const tileRidgeBot = tileBotY(ridgeZ)
   const frontEaveTop = tileTopY(tileBaseZ)
-  const backEaveTop  = tileTopY(tileBackZ)
+  const backEaveTop = tileTopY(tileBackZ)
 
   roofMat.side = THREE.DoubleSide
   function makeTile(x0: number, z0: number, y0: number, zR: number): THREE.Mesh {
     const hw = roofWidth / 2
     const geo = new THREE.BufferGeometry()
     const verts = new Float32Array([
-      x0 - hw, y0, z0,              x0 + hw, y0, z0,
-      x0 - hw, tileRidgeTop, zR,    x0 + hw, tileRidgeTop, zR,
-      x0 - hw, y0 - TILE_THICK, z0, x0 + hw, y0 - TILE_THICK, z0,
-      x0 - hw, tileRidgeBot, zR,    x0 + hw, tileRidgeBot, zR,
+      x0 - hw,
+      y0,
+      z0,
+      x0 + hw,
+      y0,
+      z0,
+      x0 - hw,
+      tileRidgeTop,
+      zR,
+      x0 + hw,
+      tileRidgeTop,
+      zR,
+      x0 - hw,
+      y0 - TILE_THICK,
+      z0,
+      x0 + hw,
+      y0 - TILE_THICK,
+      z0,
+      x0 - hw,
+      tileRidgeBot,
+      zR,
+      x0 + hw,
+      tileRidgeBot,
+      zR,
     ])
     geo.setAttribute('position', new THREE.BufferAttribute(verts, 3))
     geo.setIndex([
-      0,2,1, 1,2,3,  4,5,6, 5,7,6,
-      0,4,2, 2,4,6,  1,3,5, 3,7,5,
-      0,1,4, 1,5,4,  2,6,3, 3,6,7,
+      0,
+      2,
+      1,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      5,
+      7,
+      6,
+      0,
+      4,
+      2,
+      2,
+      4,
+      6,
+      1,
+      3,
+      5,
+      3,
+      7,
+      5,
+      0,
+      1,
+      4,
+      1,
+      5,
+      4,
+      2,
+      6,
+      3,
+      3,
+      6,
+      7,
     ])
     geo.computeVertexNormals()
     const m = new THREE.Mesh(geo, roofMat)

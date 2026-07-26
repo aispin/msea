@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { createWalls } from '../builders/walls'
-import { createRoof } from '../builders/roof'
-import { createDoor } from '../builders/door'
-import { createAllWindows } from '../builders/windows'
 import { createAttic } from '../builders/attic'
+import { createDimensions } from '../builders/dimensions'
+import { createDoor } from '../builders/door'
 import { createEnvironment } from '../builders/environment'
 import { createLabels } from '../builders/labels'
-import { createDimensions } from '../builders/dimensions'
+import { createRoof } from '../builders/roof'
+import { createWalls } from '../builders/walls'
+import { createAllWindows } from '../builders/windows'
 
 interface HouseProps {
   scene: THREE.Scene
@@ -30,7 +30,7 @@ export default function House({ scene }: HouseProps) {
 
     // 尺寸标注 — 默认隐藏, D键切换
     const dims = createDimensions()
-    dims.visible = true  // 默认显示
+    dims.visible = true // 默认显示
     dims.userData.isDimGroup = true
     group.add(dims)
     dimGroup.current = dims
@@ -46,10 +46,11 @@ export default function House({ scene }: HouseProps) {
           const materials = Array.isArray(child.material)
             ? child.material
             : [child.material]
-          materials.forEach(m => {
+          materials.forEach((m) => {
             m?.dispose()
             for (const key of Object.keys(m ?? {})) {
-              if ((m as any)[key]?.isTexture) (m as any)[key].dispose()
+              if ((m as any)[key]?.isTexture)
+                (m as any)[key].dispose()
             }
           })
         }

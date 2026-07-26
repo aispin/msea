@@ -46,7 +46,7 @@ export function createLabels(): THREE.Group {
     ['W', cx + dist * cos45, cz - dist * cos45],
   ]
   for (const [text, x, z] of dirs) {
-    const s = makeSprite(text, 56, 0x1a1a2e)
+    const s = makeSprite(text, 56, 0x1A1A2E)
     s.position.set(x, 0.05, z)
     s.scale.set(0.8, 0.4, 1)
     group.add(s)

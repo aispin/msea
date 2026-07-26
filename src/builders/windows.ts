@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
-import { createWoodMaterial, createGlassMaterial } from '../materials'
+import { createGlassMaterial, createWoodMaterial } from '../materials'
 
 export function createWindow(): THREE.Group {
   const group = new THREE.Group()

@@ -53,7 +53,7 @@ export function createGroundMaterial(color: number): THREE.MeshStandardMaterial 
 
 export function createTranslucentMaterial(
   color: number,
-  opacity: number
+  opacity: number,
 ): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({
     color,

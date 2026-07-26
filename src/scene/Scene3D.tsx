@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { LIGHTING, CAMERA, DIMENSIONS } from '../config/house'
-import House from './House'
-import { FirstPerson, buildHouseCollisionBoxes } from './FirstPerson'
+import { CAMERA, DIMENSIONS, LIGHTING } from '../config/house'
 import MobileControls from '../ui/MobileControls'
-import Compass from '../ui/Compass'
+import { buildHouseCollisionBoxes, FirstPerson } from './FirstPerson'
+import House from './House'
 
 const COLLISION_RADIUS = 0.2
 
@@ -14,10 +13,10 @@ interface Props {
 }
 
 export default function Scene3D({ onCameraReady }: Props) {
+  const _onReady = onCameraReady
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<THREE.Scene | null>(null)
   const [tourMode, setTourMode] = useState(false)
-  const [cam, setCam] = useState<THREE.PerspectiveCamera | null>(null)
 
   const fpRef = useRef<FirstPerson | null>(null)
   const controlsRef = useRef<OrbitControls | null>(null)
@@ -30,7 +29,8 @@ export default function Scene3D({ onCameraReady }: Props) {
   const handleMobileMove = useCallback((dx: number, dy: number) => {
     const fp = fpRef.current
     const cam = cameraRef.current
-    if (!fp?.isActive || !cam) return
+    if (!fp?.isActive || !cam)
+      return
 
     const forward = new THREE.Vector3()
     cam.getWorldDirection(forward)
@@ -49,31 +49,36 @@ export default function Scene3D({ onCameraReady }: Props) {
     // 碰撞检测 (分轴)
     const boxes = collisionBoxesRef.current
     const fullCollision = boxes.some(box =>
-      newPos.x - COLLISION_RADIUS < box.max.x &&
-      newPos.x + COLLISION_RADIUS > box.min.x &&
-      newPos.z - COLLISION_RADIUS < box.max.z &&
-      newPos.z + COLLISION_RADIUS > box.min.z
+      newPos.x - COLLISION_RADIUS < box.max.x
+      && newPos.x + COLLISION_RADIUS > box.min.x
+      && newPos.z - COLLISION_RADIUS < box.max.z
+      && newPos.z + COLLISION_RADIUS > box.min.z,
     )
     if (!fullCollision) {
       cam.position.copy(newPos)
-    } else {
+    }
+    else {
       const xOnly = cam.position.clone()
       xOnly.x = newPos.x
       if (!boxes.some(box =>
-        xOnly.x - COLLISION_RADIUS < box.max.x &&
-        xOnly.x + COLLISION_RADIUS > box.min.x &&
-        xOnly.z - COLLISION_RADIUS < box.max.z &&
-        xOnly.z + COLLISION_RADIUS > box.min.z
-      )) cam.position.copy(xOnly)
+        xOnly.x - COLLISION_RADIUS < box.max.x
+        && xOnly.x + COLLISION_RADIUS > box.min.x
+        && xOnly.z - COLLISION_RADIUS < box.max.z
+        && xOnly.z + COLLISION_RADIUS > box.min.z,
+      )) {
+        cam.position.copy(xOnly)
+      }
 
       const zOnly = cam.position.clone()
       zOnly.z = newPos.z
       if (!boxes.some(box =>
-        zOnly.x - COLLISION_RADIUS < box.max.x &&
-        zOnly.x + COLLISION_RADIUS > box.min.x &&
-        zOnly.z - COLLISION_RADIUS < box.max.z &&
-        zOnly.z + COLLISION_RADIUS > box.min.z
-      )) cam.position.copy(zOnly)
+        zOnly.x - COLLISION_RADIUS < box.max.x
+        && zOnly.x + COLLISION_RADIUS > box.min.x
+        && zOnly.z - COLLISION_RADIUS < box.max.z
+        && zOnly.z + COLLISION_RADIUS > box.min.z,
+      )) {
+        cam.position.copy(zOnly)
+      }
     }
   }, [])
 
@@ -81,7 +86,8 @@ export default function Scene3D({ onCameraReady }: Props) {
   const handleMobileLook = useCallback((dx: number, dy: number) => {
     const fp = fpRef.current
     const cam = cameraRef.current
-    if (!fp?.isActive || !cam) return
+    if (!fp?.isActive || !cam)
+      return
 
     const euler = new THREE.Euler().setFromQuaternion(cam.quaternion, 'YXZ')
     euler.y -= dx
@@ -106,11 +112,14 @@ export default function Scene3D({ onCameraReady }: Props) {
     container.appendChild(renderer.domElement)
 
     const threeScene = new THREE.Scene()
-    threeScene.background = new THREE.Color(0xd4e4f0)
-    threeScene.fog = new THREE.Fog(0xd4e4f0, 20, 60)
+    threeScene.background = new THREE.Color(0xD4E4F0)
+    threeScene.fog = new THREE.Fog(0xD4E4F0, 20, 60)
 
     const camera = new THREE.PerspectiveCamera(
-      CAMERA.fov, w / h, CAMERA.near, CAMERA.far
+      CAMERA.fov,
+      w / h,
+      CAMERA.near,
+      CAMERA.far,
     )
     camera.position.set(...CAMERA.initialPosition)
     camera.lookAt(...CAMERA.lookAt)
@@ -119,7 +128,7 @@ export default function Scene3D({ onCameraReady }: Props) {
     // 光照
     const dirLight = new THREE.DirectionalLight(
       LIGHTING.directional.color,
-      LIGHTING.directional.intensity
+      LIGHTING.directional.intensity,
     )
     dirLight.position.set(...LIGHTING.directional.position)
     dirLight.castShadow = true
@@ -135,7 +144,7 @@ export default function Scene3D({ onCameraReady }: Props) {
 
     threeScene.add(new THREE.AmbientLight(
       LIGHTING.ambient.color,
-      LIGHTING.ambient.intensity
+      LIGHTING.ambient.intensity,
     ))
     // 半球光已移除 — 室内不应有阳光直射
 
@@ -163,18 +172,18 @@ export default function Scene3D({ onCameraReady }: Props) {
     // Clock for delta time
     const clock = new THREE.Clock()
 
-    onCameraReady(camera)
+    _onReady?.(camera)
 
     // ─── Door click raycaster ────────────────────────────────────
     const WL = 0.15
     const totalX = WL + DIMENSIONS.houseWidth + WL
-    const doorCenterX = totalX / 2   // (0.15 + 2.56 + 0.15) / 2 = 1.43
+    const doorCenterX = totalX / 2 // (0.15 + 2.56 + 0.15) / 2 = 1.43
 
     // ─── enterTour / exitTour ────────────────────────────────────
     function enterTour() {
       setTourMode(true)
       controls.enabled = false
-      camera.position.set(doorCenterX, 1.6, WL + 0.5)  // 门内0.5米
+      camera.position.set(doorCenterX, 1.6, WL + 0.5) // 门内0.5米
       firstPerson.enable()
     }
 
@@ -193,14 +202,14 @@ export default function Scene3D({ onCameraReady }: Props) {
     // Handle Escape key → FirstPerson disables itself → call exitTour
     firstPerson.setOnExternalDisable(() => exitTour())
 
-
     // ─── Animation loop ──────────────────────────────────────────
     let animId: number
     function animate() {
       animId = requestAnimationFrame(animate)
       if (fpRef.current?.isActive) {
         fpRef.current.update(clock.getDelta())
-      } else {
+      }
+      else {
         controls.update()
       }
       renderer.render(threeScene, camera)
@@ -221,7 +230,10 @@ export default function Scene3D({ onCameraReady }: Props) {
     // D键切换尺寸标注
     function onKeyD(e: KeyboardEvent) {
       if (e.code === 'KeyD' && !firstPerson.isActive) {
-        threeScene.traverse(c => { if (c.userData.isDimGroup) c.visible = !c.visible })
+        threeScene.traverse((c) => {
+          if (c.userData.isDimGroup)
+            c.visible = !c.visible
+        })
       }
     }
     window.addEventListener('keydown', onKeyD)
@@ -241,7 +253,8 @@ export default function Scene3D({ onCameraReady }: Props) {
   const handleToggle = useCallback(() => {
     if (tourMode) {
       exitTourRef.current()
-    } else {
+    }
+    else {
       enterTourRef.current()
     }
   }, [tourMode])
@@ -253,38 +266,63 @@ export default function Scene3D({ onCameraReady }: Props) {
       {scene && <House scene={scene} />}
 
       {/* 进入/退出按钮 */}
-      {!tourMode ? (
-        <button onClick={handleToggle} className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/60 hover:bg-black/80 text-white px-5 py-2 rounded-full text-sm transition-colors">进入漫游</button>
-      ) : (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/50 text-white/70 px-5 py-2 rounded-full text-sm pointer-events-none select-none">按 ESC 退出漫游</div>
-      )}
+      {!tourMode
+        ? (
+            <button onClick={handleToggle} className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/60 hover:bg-black/80 text-white px-5 py-2 rounded-full text-sm transition-colors">进入漫游</button>
+          )
+        : (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/50 text-white/70 px-5 py-2 rounded-full text-sm pointer-events-none select-none">按 ESC 退出漫游</div>
+          )}
       {/* 操作提示 — 常驻 */}
       <div className="absolute top-32 right-4 z-10 bg-black/60 rounded-lg px-4 py-3 text-xs leading-relaxed hidden md:block">
-        {tourMode ? (
-          <>
-            <div className="flex items-center gap-2 mb-1"><span className="text-amber-400 font-bold text-[11px]">移动</span><span className="text-white/50">W A S D / ↑ ← ↓ →</span></div>
-            <div className="flex items-center gap-2 mb-1"><span className="text-amber-400 font-bold text-[11px]">环顾</span><span className="text-white/50">移动鼠标</span></div>
-            <div className="flex items-center gap-2"><span className="text-amber-400 font-bold text-[11px]">退出</span><span className="text-white/50">按 ESC 键</span></div>
-          </>
-        ) : (
-          <>
-            <div className="flex items-center gap-2 mb-1"><span className="text-amber-400 font-bold text-[11px]">旋转</span><span className="text-white/50">鼠标左键拖拽</span></div>
-            <div className="flex items-center gap-2 mb-1"><span className="text-amber-400 font-bold text-[11px]">缩放</span><span className="text-white/50">滚轮</span></div>
-            <div className="flex items-center gap-2"><span className="text-amber-400 font-bold text-[11px]">平移</span><span className="text-white/50">鼠标中键拖拽</span></div>
-          </>
-        )}
+        {tourMode
+          ? (
+              <>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-amber-400 font-bold text-[11px]">移动</span>
+                  <span className="text-white/50">W A S D / ↑ ← ↓ →</span>
+                </div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-amber-400 font-bold text-[11px]">环顾</span>
+                  <span className="text-white/50">移动鼠标</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-amber-400 font-bold text-[11px]">退出</span>
+                  <span className="text-white/50">按 ESC 键</span>
+                </div>
+              </>
+            )
+          : (
+              <>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-amber-400 font-bold text-[11px]">旋转</span>
+                  <span className="text-white/50">鼠标左键拖拽</span>
+                </div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-amber-400 font-bold text-[11px]">缩放</span>
+                  <span className="text-white/50">滚轮</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-amber-400 font-bold text-[11px]">平移</span>
+                  <span className="text-white/50">鼠标中键拖拽</span>
+                </div>
+              </>
+            )}
         <div className="border-t border-white/20 my-1.5" />
-        <div className="flex items-center gap-2"><span className="text-amber-400 font-bold text-[11px]">标注</span><span className="text-white/50">按 D 键 切换</span></div>
+        <div className="flex items-center gap-2">
+          <span className="text-amber-400 font-bold text-[11px]">标注</span>
+          <span className="text-white/50">按 D 键 切换</span>
+        </div>
       </div>
 
       {/* 移动端虚拟摇杆 + 环顾 (仅触摸设备) */}
       {'ontouchstart' in window && (
         <MobileControls
-        inTour={tourMode}
-        onMove={handleMobileMove}
-        onLook={handleMobileLook}
-        onToggle={() => exitTourRef.current()}
-      />
+          inTour={tourMode}
+          onMove={handleMobileMove}
+          onLook={handleMobileLook}
+          onToggle={() => exitTourRef.current()}
+        />
       )}
     </>
   )

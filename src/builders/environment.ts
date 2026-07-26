@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { DIMENSIONS, ZONE_OFFSETS, COLORS } from '../config/house'
+import { COLORS, DIMENSIONS, ZONE_OFFSETS } from '../config/house'
 import { createGroundMaterial, createTranslucentMaterial } from '../materials'
 
 export function createEnvironment(): THREE.Group {
@@ -40,7 +40,7 @@ export function createEnvironment(): THREE.Group {
   neighbor.position.set(
     -(gap + neighborW / 2),
     neighborH / 2,
-    totalLen / 2
+    totalLen / 2,
   )
   neighbor.castShadow = true
   group.add(neighbor)

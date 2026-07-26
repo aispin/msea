@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import * as THREE from 'three'
+import type * as THREE from 'three'
+import { useCallback, useState } from 'react'
 import Scene3D from './scene/Scene3D'
 import Compass from './ui/Compass'
 import LoadingScreen from './ui/LoadingScreen'

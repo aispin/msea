@@ -89,14 +89,19 @@ export class FirstPerson {
   }
 
   update(delta: number) {
-    if (!this.enabled) return
+    if (!this.enabled)
+      return
 
     // 移动方向
     this.direction.set(0, 0, 0)
-    if (this.keys.has('KeyW') || this.keys.has('ArrowUp')) this.direction.z += 1
-    if (this.keys.has('KeyS') || this.keys.has('ArrowDown')) this.direction.z -= 1
-    if (this.keys.has('KeyA') || this.keys.has('ArrowLeft')) this.direction.x -= 1
-    if (this.keys.has('KeyD') || this.keys.has('ArrowRight')) this.direction.x += 1
+    if (this.keys.has('KeyW') || this.keys.has('ArrowUp'))
+      this.direction.z += 1
+    if (this.keys.has('KeyS') || this.keys.has('ArrowDown'))
+      this.direction.z -= 1
+    if (this.keys.has('KeyA') || this.keys.has('ArrowLeft'))
+      this.direction.x -= 1
+    if (this.keys.has('KeyD') || this.keys.has('ArrowRight'))
+      this.direction.x += 1
     this.direction.normalize()
 
     // 相机局部方向 → 世界方向
@@ -114,24 +119,27 @@ export class FirstPerson {
     const newPos = this.camera.position.clone().add(this.velocity)
     if (!this.checkCollision(newPos)) {
       this.camera.position.copy(newPos)
-    } else {
+    }
+    else {
       // 分轴尝试
       const xOnly = this.camera.position.clone()
       xOnly.x = newPos.x
-      if (!this.checkCollision(xOnly)) this.camera.position.copy(xOnly)
+      if (!this.checkCollision(xOnly))
+        this.camera.position.copy(xOnly)
       const zOnly = this.camera.position.clone()
       zOnly.z = newPos.z
-      if (!this.checkCollision(zOnly)) this.camera.position.copy(zOnly)
+      if (!this.checkCollision(zOnly))
+        this.camera.position.copy(zOnly)
     }
   }
 
   private checkCollision(pos: THREE.Vector3): boolean {
     for (const box of this.collisionBoxes) {
       if (
-        pos.x - COLLISION_RADIUS < box.max.x &&
-        pos.x + COLLISION_RADIUS > box.min.x &&
-        pos.z - COLLISION_RADIUS < box.max.z &&
-        pos.z + COLLISION_RADIUS > box.min.z
+        pos.x - COLLISION_RADIUS < box.max.x
+        && pos.x + COLLISION_RADIUS > box.min.x
+        && pos.z - COLLISION_RADIUS < box.max.z
+        && pos.z + COLLISION_RADIUS > box.min.z
       ) {
         return true
       }
@@ -143,7 +151,8 @@ export class FirstPerson {
   private onKeyUp = (e: KeyboardEvent) => { this.keys.delete(e.code) }
 
   private onMouseMove = (e: MouseEvent) => {
-    if (!this.enabled) return
+    if (!this.enabled)
+      return
     this.euler.setFromQuaternion(this.camera.quaternion)
     this.euler.y -= e.movementX * MOUSE_SENSITIVITY
     this.euler.x -= e.movementY * MOUSE_SENSITIVITY
@@ -200,7 +209,7 @@ export function buildHouseCollisionBoxes(): CollisionBox[] {
   const HW = DIMENSIONS.houseWidth
   const totalX = WL + HW + WL
   const zEnd = ZONE_OFFSETS.totalLength
-  const zAB = ZONE_OFFSETS.zoneBStart  // A-B墙NE面
+  const zAB = ZONE_OFFSETS.zoneBStart // A-B墙NE面
 
   const boxes: CollisionBox[] = [
     // SW外墙 (正面)
@@ -381,9 +390,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 
 // 关键代码片段：
 
-import { FirstPerson, buildHouseCollisionBoxes } from './FirstPerson'
-import MobileControls from '../ui/MobileControls'
 import { DIMENSIONS } from '../config/house'
+import MobileControls from '../ui/MobileControls'
+import { buildHouseCollisionBoxes, FirstPerson } from './FirstPerson'
 
 // 在 useEffect 内，OrbitControls 创建后：
 const fp = useRef<FirstPerson | null>(null)
@@ -395,8 +404,9 @@ firstPerson.setCollisionBoxes(buildHouseCollisionBoxes())
 fp.current = firstPerson
 
 // 门点击检测 (在 canvas 上)
-const onCanvasClick = (e: MouseEvent) => {
-  if (tourMode) return
+function onCanvasClick(e: MouseEvent) {
+  if (tourMode)
+    return
   const mouse = new THREE.Vector2()
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1
@@ -429,7 +439,7 @@ function enterTour() {
   camera.position.set(
     (0.15 + DIMENSIONS.houseWidth + 0.15) / 2,
     1.6,
-    -1.0  // 门前1米
+    -1.0 // 门前1米
   )
   firstPerson.enable()
 }
@@ -445,7 +455,8 @@ function exitTour() {
 
 // 移动端移动/环顾回调
 function handleMobileMove(dx: number, dy: number) {
-  if (!fp.current?.isActive) return
+  if (!fp.current?.isActive)
+    return
   const forward = new THREE.Vector3()
   camera.getWorldDirection(forward)
   forward.y = 0; forward.normalize()
@@ -464,7 +475,8 @@ function animate() {
   animId = requestAnimationFrame(animate)
   if (fp.current?.isActive) {
     fp.current.update(clock.getDelta())
-  } else {
+  }
+  else {
     controls.update()
   }
   renderer.render(threeScene, camera)
@@ -474,7 +486,7 @@ function animate() {
 - [ ] **Step 2: 添加 Toggle 按钮 UI（在 Scene3D 的 JSX 中）**
 
 ```tsx
-{/* Toggle 按钮 — 桌面端 */}
+{ /* Toggle 按钮 — 桌面端 */ }
 <button
   onClick={() => tourMode ? exitTour() : (setTourMode(true), (() => { /* 触发门点击逻辑 */ })())}
   className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/60 hover:bg-black/80 text-white px-5 py-2 rounded-full text-sm transition-colors"

@@ -1,5 +1,8 @@
 import * as THREE from 'three'
 
+// ─── 碰撞盒 ─────────────────────────────────────────────────
+import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
+
 const MOVE_SPEED = 3.0
 const MOUSE_SENSITIVITY = 0.002
 const COLLISION_RADIUS = 0.2
@@ -57,13 +60,18 @@ export class FirstPerson {
   }
 
   update(delta: number) {
-    if (!this.enabled) return
+    if (!this.enabled)
+      return
 
     this.direction.set(0, 0, 0)
-    if (this.keys.has('KeyW') || this.keys.has('ArrowUp')) this.direction.z += 1
-    if (this.keys.has('KeyS') || this.keys.has('ArrowDown')) this.direction.z -= 1
-    if (this.keys.has('KeyA') || this.keys.has('ArrowLeft')) this.direction.x -= 1
-    if (this.keys.has('KeyD') || this.keys.has('ArrowRight')) this.direction.x += 1
+    if (this.keys.has('KeyW') || this.keys.has('ArrowUp'))
+      this.direction.z += 1
+    if (this.keys.has('KeyS') || this.keys.has('ArrowDown'))
+      this.direction.z -= 1
+    if (this.keys.has('KeyA') || this.keys.has('ArrowLeft'))
+      this.direction.x -= 1
+    if (this.keys.has('KeyD') || this.keys.has('ArrowRight'))
+      this.direction.x += 1
     this.direction.normalize()
 
     const forward = new THREE.Vector3()
@@ -79,18 +87,21 @@ export class FirstPerson {
     const newPos = this.camera.position.clone().add(this.velocity)
     if (!this.checkCollision(newPos)) {
       this.camera.position.copy(newPos)
-    } else {
+    }
+    else {
       const xOnly = this.camera.position.clone(); xOnly.x = newPos.x
-      if (!this.checkCollision(xOnly)) this.camera.position.copy(xOnly)
+      if (!this.checkCollision(xOnly))
+        this.camera.position.copy(xOnly)
       const zOnly = this.camera.position.clone(); zOnly.z = newPos.z
-      if (!this.checkCollision(zOnly)) this.camera.position.copy(zOnly)
+      if (!this.checkCollision(zOnly))
+        this.camera.position.copy(zOnly)
     }
   }
 
   private checkCollision(pos: THREE.Vector3): boolean {
     for (const box of this.collisionBoxes) {
-      if (pos.x - COLLISION_RADIUS < box.max.x && pos.x + COLLISION_RADIUS > box.min.x &&
-          pos.z - COLLISION_RADIUS < box.max.z && pos.z + COLLISION_RADIUS > box.min.z) {
+      if (pos.x - COLLISION_RADIUS < box.max.x && pos.x + COLLISION_RADIUS > box.min.x
+        && pos.z - COLLISION_RADIUS < box.max.z && pos.z + COLLISION_RADIUS > box.min.z) {
         return true
       }
     }
@@ -108,7 +119,8 @@ export class FirstPerson {
   }
 
   private onMouseMove = (e: MouseEvent) => {
-    if (!this.enabled) return
+    if (!this.enabled)
+      return
     this.euler.setFromQuaternion(this.camera.quaternion)
     this.euler.y -= e.movementX * MOUSE_SENSITIVITY
     this.euler.x -= e.movementY * MOUSE_SENSITIVITY
@@ -128,9 +140,6 @@ export class FirstPerson {
     }
   }
 }
-
-// ─── 碰撞盒 ─────────────────────────────────────────────────
-import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
 
 export function buildHouseCollisionBoxes(): CollisionBox[] {
   const WL = 0.15

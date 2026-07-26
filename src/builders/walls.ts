@@ -2,11 +2,11 @@ import * as THREE from 'three'
 import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
 import { createWallMaterial } from '../materials'
 
-const WL = 0.15  // 墙厚
-const HW = DIMENSIONS.houseWidth  // 2.56 内净宽
+const WL = 0.15 // 墙厚
+const HW = DIMENSIONS.houseWidth // 2.56 内净宽
 
 /** 建筑总宽(外墙外到外) */
-const totalX = WL + HW + WL  // 2.86
+const totalX = WL + HW + WL // 2.86
 
 function makeWall(cx: number, cy: number, cz: number, sx: number, sy: number, sz: number): THREE.Mesh {
   const geo = new THREE.BoxGeometry(sx, sy, sz)
@@ -21,24 +21,24 @@ function makeWall(cx: number, cy: number, cz: number, sx: number, sy: number, sz
 export function createWalls(): THREE.Group {
   const group = new THREE.Group()
 
-  const hA = DIMENSIONS.zoneA.wallHeight    // 3.15
-  const hBC = DIMENSIONS.zoneB.eaveHeight    // 3.15
-  const lA = DIMENSIONS.zoneA.length         // 2.9
-  const lB = DIMENSIONS.zoneB.length         // 3.0
-  const lC = DIMENSIONS.zoneC.length         // 2.55
+  const hA = DIMENSIONS.zoneA.wallHeight // 3.15
+  const hBC = DIMENSIONS.zoneB.eaveHeight // 3.15
+  const lA = DIMENSIONS.zoneA.length // 2.9
+  const lB = DIMENSIONS.zoneB.length // 3.0
+  const lC = DIMENSIONS.zoneC.length // 2.55
 
   // 区域边界Z坐标
-  const zA = ZONE_OFFSETS.zoneAStart         // 0.15  A区起
-  const zAB = ZONE_OFFSETS.zoneBStart        // 3.20  B区起 (= A-B墙NE面)
-  const zC = ZONE_OFFSETS.zoneCStart         // 6.20  C区起
-  const zEnd = ZONE_OFFSETS.totalLength      // 8.90  建筑总长
-  const zAB_SW = ZONE_OFFSETS.wallAB_SW      // 3.05  A-B墙SW面
+  const zA = ZONE_OFFSETS.zoneAStart // 0.15  A区起
+  const zAB = ZONE_OFFSETS.zoneBStart // 3.20  B区起 (= A-B墙NE面)
+  const zC = ZONE_OFFSETS.zoneCStart // 6.20  C区起
+  const zEnd = ZONE_OFFSETS.totalLength // 8.90  建筑总长
+  const zAB_SW = ZONE_OFFSETS.wallAB_SW // 3.05  A-B墙SW面
 
   // --- SW墙 (A区正面，入户门) ---
-  const doorW = DIMENSIONS.door.width        // 1.0
-  const doorH = DIMENSIONS.door.height       // 2.1
-  const sideWallW = (totalX - doorW) / 2    // (2.86-1.0)/2 = 0.93
-  const lintelH = hA - doorH                // 1.05
+  const doorW = DIMENSIONS.door.width // 1.0
+  const doorH = DIMENSIONS.door.height // 2.1
+  const sideWallW = (totalX - doorW) / 2 // (2.86-1.0)/2 = 0.93
+  const lintelH = hA - doorH // 1.05
   // 左侧段
   group.add(makeWall(sideWallW / 2, hA / 2, WL / 2, sideWallW, hA, WL))
   // 右侧段
@@ -54,7 +54,7 @@ export function createWalls(): THREE.Group {
   group.add(makeWall(WL / 2, hBC / 2, zAB + zBC_len / 2, WL, hBC, zBC_len))
 
   // --- SE墙 (邻居侧) ---
-  const seX = totalX - WL / 2  // 外墙中心X
+  const seX = totalX - WL / 2 // 外墙中心X
   // A区段
   group.add(makeWall(seX, hA / 2, zAB / 2, WL, hA, zAB))
   // B+C区段
@@ -64,13 +64,13 @@ export function createWalls(): THREE.Group {
   group.add(makeWall(totalX / 2, hBC / 2, zEnd - WL / 2, totalX, hBC, WL))
 
   // --- A-B 承重墙, 中间门洞 1.06m×2.58m, 褐红木框5cm ---
-  const innerDoorW = DIMENSIONS.door.innerWidth   // 1.06m
-  const innerDoorH = DIMENSIONS.door.innerHeight  // 2.58m
+  const innerDoorW = DIMENSIONS.door.innerWidth // 1.06m
+  const innerDoorH = DIMENSIONS.door.innerHeight // 2.58m
   const innerSideW = (totalX - innerDoorW) / 2
-  const innerLintelH = hA - innerDoorH             // 0.57m
-  const frameW = DIMENSIONS.door.frameWidth        // 0.05m
-  const frameMat = new THREE.MeshStandardMaterial({ color: 0x6b2020, roughness: 0.5, metalness: 0.1 })
-  const abWallZ = zAB_SW + WL / 2          // A-B墙中心Z
+  const innerLintelH = hA - innerDoorH // 0.57m
+  const frameW = DIMENSIONS.door.frameWidth // 0.05m
+  const frameMat = new THREE.MeshStandardMaterial({ color: 0x6B2020, roughness: 0.5, metalness: 0.1 })
+  const abWallZ = zAB_SW + WL / 2 // A-B墙中心Z
   // 左侧段
   group.add(makeWall(innerSideW / 2, hA / 2, abWallZ, innerSideW, hA, WL))
   // 右侧段
@@ -100,9 +100,9 @@ export function createWalls(): THREE.Group {
     return mesh
   }
 
-  group.add(makeFloor(zA, lA, 0xd5cec5))  // A区暖灰
-  group.add(makeFloor(zAB, lB, 0xe0d8c8)) // B区浅米
-  group.add(makeFloor(zC, lC, 0xe8dfd0))  // C区暖黄
+  group.add(makeFloor(zA, lA, 0xD5CEC5)) // A区暖灰
+  group.add(makeFloor(zAB, lB, 0xE0D8C8)) // B区浅米
+  group.add(makeFloor(zC, lC, 0xE8DFD0)) // C区暖黄
 
   return group
 }

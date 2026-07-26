@@ -1,6 +1,6 @@
+import nipplejs from 'nipplejs'
 // src/ui/MobileControls.tsx
 import { useEffect, useRef } from 'react'
-import nipplejs from 'nipplejs'
 
 interface Props {
   inTour: boolean
@@ -16,7 +16,8 @@ export default function MobileControls({ inTour, onMove, onLook, onToggle }: Pro
   const lookId = useRef<number>(0)
 
   useEffect(() => {
-    if (!inTour || !joystickRef.current) return
+    if (!inTour || !joystickRef.current)
+      return
 
     const nipple = nipplejs.create({
       zone: joystickRef.current,
@@ -44,9 +45,10 @@ export default function MobileControls({ inTour, onMove, onLook, onToggle }: Pro
 
   // 环顾触摸
   useEffect(() => {
-    if (!inTour || !lookRef.current) return
+    if (!inTour || !lookRef.current)
+      return
     const el = lookRef.current
-    let lastX = 0, lastY = 0
+    let lastX = 0; let lastY = 0
 
     const onTouchStart = (e: TouchEvent) => {
       lastX = e.touches[0].clientX
@@ -68,7 +70,8 @@ export default function MobileControls({ inTour, onMove, onLook, onToggle }: Pro
     }
   }, [inTour, onLook])
 
-  if (!inTour) return null
+  if (!inTour)
+    return null
 
   return (
     <>

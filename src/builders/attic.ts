@@ -56,29 +56,33 @@ export function createAttic(): THREE.Group {
   const parapetH = DIMENSIONS.zoneA.parapetHeight
   const parapetT = 0.1
   const parapetY = hA + parapetH / 2
-  const extSW = 0  // SW墙外
+  const extSW = 0 // SW墙外
   const extSE = WL + HW + WL
   // NW/SW/SE/NE 四面围栏
   const nwParapet = new THREE.Mesh(
-    new THREE.BoxGeometry(parapetT, parapetH, zAB - extSW), parapetMat
+    new THREE.BoxGeometry(parapetT, parapetH, zAB - extSW),
+    parapetMat,
   )
   nwParapet.position.set(extSW + parapetT / 2, parapetY, (extSW + zAB) / 2)
   group.add(nwParapet)
 
   const seParapet = new THREE.Mesh(
-    new THREE.BoxGeometry(parapetT, parapetH, zAB - extSW), parapetMat
+    new THREE.BoxGeometry(parapetT, parapetH, zAB - extSW),
+    parapetMat,
   )
   seParapet.position.set(extSE - parapetT / 2, parapetY, (extSW + zAB) / 2)
   group.add(seParapet)
 
   const swParapet = new THREE.Mesh(
-    new THREE.BoxGeometry(extSE - extSW, parapetH, parapetT), parapetMat
+    new THREE.BoxGeometry(extSE - extSW, parapetH, parapetT),
+    parapetMat,
   )
   swParapet.position.set((extSW + extSE) / 2, parapetY, extSW + parapetT / 2)
   group.add(swParapet)
 
   const neParapet = new THREE.Mesh(
-    new THREE.BoxGeometry(extSE - extSW, parapetH, parapetT), parapetMat
+    new THREE.BoxGeometry(extSE - extSW, parapetH, parapetT),
+    parapetMat,
   )
   neParapet.position.set((extSW + extSE) / 2, parapetY, zAB - parapetT / 2)
   group.add(neParapet)
