@@ -48,16 +48,16 @@ export function createDoor(): THREE.Group {
   rightFrame.position.set(doorCenterX + doorW / 2 + frameThick / 2, doorH / 2, doorT / 2)
   group.add(rightFrame)
 
-  // 门把手 — 简单金属块，有体积感，紧贴门板
-  const pullGeo = new THREE.BoxGeometry(0.03, 0.06, 0.02)  // 长方体把手
-  for (const side of [-1, 1]) {
-    const pullX = doorCenterX + side * halfW * 0.55
-    const pullY = doorH * 0.55
-    const pullZ = doorT / 2 + 0.01  // 一半嵌入门内，一半突出
-    const pull = new THREE.Mesh(pullGeo, pullMat)
-    pull.position.set(pullX, pullY, pullZ)
-    group.add(pull)
-  }
+  // 门把手 — 子节点添加到门扇本地空间，与门板绝对固定
+  const pullGeo = new THREE.BoxGeometry(0.04, 0.08, 0.015)
+  // 左门把手 — 在左门扇本地坐标 (原点在门扇几何中心)
+  const pullLeft = new THREE.Mesh(pullGeo, pullMat)
+  pullLeft.position.set(-halfW * 0.15, 0, doorT / 2 + 0.007)
+  leftDoor.add(pullLeft)
+  // 右门把手
+  const pullRight = new THREE.Mesh(pullGeo, pullMat)
+  pullRight.position.set(halfW * 0.15, 0, doorT / 2 + 0.007)
+  rightDoor.add(pullRight)
 
   // 门放置在 SW墙 z=0 处
   group.position.set(0, 0, 0)
