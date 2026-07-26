@@ -32,13 +32,17 @@ export default function House({ scene }: HouseProps) {
     return () => {
       scene.remove(group)
       group.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
+        if (child instanceof THREE.Mesh || child instanceof THREE.Sprite) {
           child.geometry?.dispose()
-          if (Array.isArray(child.material)) {
-            child.material.forEach(m => m.dispose())
-          } else {
-            child.material?.dispose()
-          }
+          const materials = Array.isArray(child.material)
+            ? child.material
+            : [child.material]
+          materials.forEach(m => {
+            m?.dispose()
+            for (const key of Object.keys(m ?? {})) {
+              if ((m as any)[key]?.isTexture) (m as any)[key].dispose()
+            }
+          })
         }
       })
     }
