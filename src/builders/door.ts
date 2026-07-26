@@ -1,11 +1,12 @@
 import * as THREE from 'three'
-import { DIMENSIONS } from '../config/house'
-import { createWoodMaterial, createDoorRingMaterial } from '../materials'
+import { DIMENSIONS, COLORS } from '../config/house'
+import { createWoodMaterial } from '../materials'
 
 export function createDoor(): THREE.Group {
   const group = new THREE.Group()
   const woodMat = createWoodMaterial()
-  const ringMat = createDoorRingMaterial()
+  // 门把手用 BasicMaterial — 无光照，完全固定视觉，不会因高光产生"飘动"错觉
+  const pullMat = new THREE.MeshBasicMaterial({ color: COLORS.doorRing })
 
   const doorW = DIMENSIONS.door.width    // 1.0m total
   const doorH = DIMENSIONS.door.height    // 2.1m
@@ -53,7 +54,7 @@ export function createDoor(): THREE.Group {
     const pullX = doorCenterX + side * halfW * 0.55
     const pullY = doorH * 0.55
     const pullZ = doorT / 2 + 0.01  // 一半嵌入门内，一半突出
-    const pull = new THREE.Mesh(pullGeo, ringMat)
+    const pull = new THREE.Mesh(pullGeo, pullMat)
     pull.position.set(pullX, pullY, pullZ)
     group.add(pull)
   }
