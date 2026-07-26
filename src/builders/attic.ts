@@ -22,20 +22,18 @@ export function createAttic(): THREE.Group {
   floor.receiveShadow = true
   group.add(floor)
 
-  // 支柱
-  const pillarR = DIMENSIONS.attic.pillarRadius
-  const pillarGeo = new THREE.CylinderGeometry(pillarR, pillarR, floorH, 8)
-  const pillarPositions: [number, number, number][] = [
-    [WL + 0.15, floorH / 2, zC + 0.15],
-    [WL + HW - 0.15, floorH / 2, zC + 0.15],
-    [WL + 0.15, floorH / 2, zC + lC - 0.15],
-    [WL + HW - 0.15, floorH / 2, zC + lC - 0.15],
+  // 横梁 — 4根，支撑阁楼楼板
+  const beamGeo = new THREE.BoxGeometry(HW - 0.2, 0.06, 0.1)
+  const beamPositions: [number, number, number][] = [
+    [WL + HW / 2, floorH, zC + 0.3],
+    [WL + HW / 2, floorH, zC + lC / 2],
+    [WL + HW / 2, floorH, zC + lC - 0.3],
   ]
-  for (const [px, py, pz] of pillarPositions) {
-    const pillar = new THREE.Mesh(pillarGeo, woodMat)
-    pillar.position.set(px, py, pz)
-    pillar.castShadow = true
-    group.add(pillar)
+  for (const [px, py, pz] of beamPositions) {
+    const beam = new THREE.Mesh(beamGeo, woodMat)
+    beam.position.set(px, py, pz)
+    beam.castShadow = true
+    group.add(beam)
   }
 
   // A区天花板 + 天台围栏
@@ -46,7 +44,9 @@ export function createAttic(): THREE.Group {
 
   // 天花板
   const ceilingGeoA = new THREE.PlaneGeometry(HW + WL, lA + WL)
-  const ceilingA = new THREE.Mesh(ceilingGeoA, createParapetMaterial())
+  const ceilingMatA = createParapetMaterial()
+  ceilingMatA.side = THREE.DoubleSide
+  const ceilingA = new THREE.Mesh(ceilingGeoA, ceilingMatA)
   ceilingA.rotation.x = -Math.PI / 2
   ceilingA.position.set(totalX / 2, hA, zA + lA / 2)
   ceilingA.receiveShadow = true

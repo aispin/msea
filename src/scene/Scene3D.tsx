@@ -162,8 +162,8 @@ export default function Scene3D({ onCameraReady }: Props) {
     collisionBoxesRef.current = boxes
     fpRef.current = firstPerson
 
-    // Clock for delta time
-    const clock = new THREE.Clock()
+    // Timer for delta time
+    const timer = new THREE.Timer()
 
     onCameraReady(camera)
 
@@ -176,7 +176,7 @@ export default function Scene3D({ onCameraReady }: Props) {
     function enterTour() {
       setTourMode(true)
       controls.enabled = false
-      camera.position.set(doorCenterX, 1.6, -1.0)  // 门前1米
+      camera.position.set(doorCenterX, 1.6, WL + 0.5)  // 门内0.5米
       firstPerson.enable()
     }
 
@@ -223,7 +223,7 @@ export default function Scene3D({ onCameraReady }: Props) {
     function animate() {
       animId = requestAnimationFrame(animate)
       if (fpRef.current?.isActive) {
-        fpRef.current.update(clock.getDelta())
+        fpRef.current.update(timer.getDelta())
       } else {
         controls.update()
       }
@@ -268,13 +268,31 @@ export default function Scene3D({ onCameraReady }: Props) {
       <div ref={containerRef} className="absolute inset-0" />
       {scene && <House scene={scene} />}
 
-      {/* 桌面端 toggle 按钮 */}
-      <button
-        onClick={handleToggle}
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/60 hover:bg-black/80 text-white px-5 py-2 rounded-full text-sm transition-colors"
-      >
-        {tourMode ? '退出漫游' : '进入漫游'}
-      </button>
+      {/* 进入/退出漫游按钮 */}
+      {!tourMode ? (
+        <button
+          onClick={handleToggle}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/60 hover:bg-black/80 text-white px-5 py-2 rounded-full text-sm transition-colors"
+        >
+          进入漫游
+        </button>
+      ) : (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/50 text-white/70 px-5 py-2 rounded-full text-sm pointer-events-none select-none">
+          按 ESC 退出漫游
+        </div>
+      )}
+
+      {/* 漫游操作提示 */}
+      {tourMode && (
+        <div className="absolute top-20 right-4 z-10 bg-black/60 text-white/80 rounded-lg px-4 py-3 text-xs leading-relaxed hidden md:block">
+          <p className="font-bold mb-1">移动</p>
+          <p>W A S D / ↑ ← ↓ →</p>
+          <p className="font-bold mt-2 mb-1">环顾</p>
+          <p>鼠标移动</p>
+          <p className="font-bold mt-2 mb-1">退出</p>
+          <p>按 ESC 键</p>
+        </div>
+      )}
 
       {/* 移动端虚拟摇杆 + 环顾 */}
       <MobileControls
