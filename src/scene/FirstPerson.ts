@@ -19,12 +19,17 @@ export class FirstPerson {
   private direction = new THREE.Vector3()
   private keys = new Set<string>()
   private collisionBoxes: CollisionBox[] = []
+  private onExternalDisable?: () => void
 
   get isActive() { return this.enabled }
 
   constructor(camera: THREE.PerspectiveCamera, domElement: HTMLElement) {
     this.camera = camera
     this.domElement = domElement
+  }
+
+  setOnExternalDisable(fn: () => void) {
+    this.onExternalDisable = fn
   }
 
   setCollisionBoxes(boxes: CollisionBox[]) {
@@ -121,6 +126,7 @@ export class FirstPerson {
       document.removeEventListener('mousemove', this.onMouseMove)
       document.removeEventListener('pointerlockchange', this.onPointerLockChange)
       this.keys.clear()
+      this.onExternalDisable?.()
     }
   }
 }
