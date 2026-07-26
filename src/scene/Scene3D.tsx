@@ -177,8 +177,6 @@ export default function Scene3D({ onCameraReady }: Props) {
       setTourMode(true)
       controls.enabled = false
       camera.position.set(doorCenterX, 1.6, WL + 0.5)
-      // requestPointerLock 必须由用户手势直接触发
-      document.body.requestPointerLock()
       firstPerson.enable()
     }
 
