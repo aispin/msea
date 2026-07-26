@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
-import { aisleX, frontZ, centerX } from '../utils/screen'
+import { aisleX, neighborX, frontZ, centerX } from '../utils/screen'
 
 const DIM_COLOR = 0xffd700
 const WL = 0.15
@@ -35,8 +35,10 @@ function dimText(text: string, pos: THREE.Vector3, scale = 0.6): THREE.Sprite {
 export function createDimensions(): THREE.Group {
   const group = new THREE.Group()
 
-  group.add(dimLine([new THREE.Vector3(DIM_X, 0.02, 0), new THREE.Vector3(DIM_X, 0.02, totalZ)]))
-  group.add(dimText(`${totalZ.toFixed(2)}m`, new THREE.Vector3(DIM_LABEL_X, 0.15, totalZ / 2)))
+  // 总长 — 东南侧(邻居)
+  const nbrX = neighborX(DIM_OFFSET)
+  group.add(dimLine([new THREE.Vector3(nbrX, 0.02, 0), new THREE.Vector3(nbrX, 0.02, totalZ)]))
+  group.add(dimText(`${totalZ.toFixed(2)}m`, new THREE.Vector3(neighborX(DIM_OFFSET + 0.15), 0.15, totalZ / 2)))
 
   const frontZOff = frontZ(DIM_OFFSET)
   group.add(dimLine([new THREE.Vector3(0, 0.02, frontZOff), new THREE.Vector3(totalX, 0.02, frontZOff)]))
