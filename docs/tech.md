@@ -1,10 +1,38 @@
-# 房屋结构几何技术文档
+# 技术文档 — 老房 3D 可视化工具
 
 ## 坐标系
 
-- 建筑轴线沿 Z 轴（SW→NE），宽沿 X 轴（NW→SE），高沿 Y 轴
-- 外墙外表面定义原点：SW 墙 Z=0，NW 墙 X=0
-- 墙厚 0.15m，内净尺寸参见 `src/config/house.ts`
+世界坐标系：
+- +Z = 东北(远, 建筑背面)
+- -Z = 西南(近, 建筑正面/入户门)
+- -X = 西北(过道侧)
+- +X = 东南(邻居侧)
+
+视觉映射：相机在西南(-Z)望向东北(+Z) → **屏幕左=世界+X**, **屏幕右=世界-X**（原因见下文）。
+
+## Three.js lookAt 与屏幕方向
+
+`Matrix4.lookAt(eye, target, up)` 中 `x = cross(up, normalize(eye - target))`。
+
+- 相机在 +Z 看向原点（标准用法）：`eye-target ≈ +Z`，`cross(up, +Z) = +X`，屏幕右=世界+X ✓
+- **相机在 -Z 看向 +Z**（本项目）：`eye-target ≈ -Z`，`cross(up, -Z) = -X`，**屏幕右=世界-X**，左右颠倒
+
+本项目相机在西南(-Z)望向东北(+Z)，故环境元素（过道/邻居）位置已按此视觉正确性调整。
+
+## Three.js 旋转与坐标映射
+
+`rotation.y` 会改变 local 轴和 world 轴的对应关系。**`position` 设置的是旋转后的原点位置**，不是几何中心。
+
+| rotation.y | local X (窗宽) | local Z (面朝向) | position.z 含义 |
+|---|---|---|---|
+| `π/2` | → world **-Z** | → world **+X** (SE) | 窗**右**边界 |
+| `-π/2` | → world **+Z** | → world **-X** (NW) | 窗**左**边界 |
+
+计算窗中心在世界 Z 的位置：
+- `rotation.y = π/2`：`centerZ = position.z - width/2`
+- `rotation.y = -π/2`：`centerZ = position.z + width/2`
+
+**常见陷阱**：公式里 `width/2` 的正负号取决于旋转方向，用反会导致整窗偏移一个窗宽。
 
 ## 屋顶结构
 
@@ -33,50 +61,41 @@ roofAngle  = atan2(triH, halfRoof) ≈ 33.7°
 
 #### 瓦片（外层）
 
-- 覆盖范围：Z 从 `zStart - WL/2 - overhang` 到 `zStart + roofLen + WL/2 + overhang`（含出挑+墙厚）
+- 覆盖范围：含出挑 + 墙厚
 - Z 总跨度：`roofLenWithOverhang = roofLen + 2×overhang + WL`
-- 半跨：`halfSpan = roofLenWithOverhang / 2`
-- 厚度：3cm
+- 厚度：3cm，DoubleSide
 - 实现：自定义 BufferGeometry（8 顶点，上下两层 + 四侧面）
-- 材质：`roofMat`（深灰瓦片色，DoubleSide）
 
 #### 椽条（内层）
 
-- 覆盖范围：Z 从 `zStart` 到 `zStart + roofLen`（墙到墙，不含出挑）
+- 覆盖范围：Z 从 `zStart` 到 `zStart + roofLen`（墙到墙）
 - 半跨：`halfRafter = roofLen / 2`
-- 坡面实长：`sqrt(halfRafter² + triH²)`
 - 截面：BoxGeometry(0.06, 0.10, slopeLen)，宽 6cm × 高 10cm × 坡长
-- 截面旋转后 Y 投影：`rafterHalfH × cos(roofAngle)`，其中 `rafterHalfH = 0.05`
-- 材质：`rafterMat`（原木色）
-- 间隔：40cm
+- 间距：40cm
 
-**层级偏移**（从瓦片顶面向下）：
+#### 层级 Y 偏移
+
+BoxGeometry 经 `rotation.x` 旋转后，局部 Y 在 world Y 的投影 = `halfHeight × cos(angle)`。
+
+从瓦片顶面向下：
 
 | 层 | Y 偏移 | 说明 |
 |---|---|---|
 | 瓦片顶面 | `eaveH + triH/2`（中点） | 坡面几何中点 |
 | 瓦片底面 | 顶面 − `TILE_THICK` | 3cm 厚壳 |
 | 椽条顶面 | 瓦片底面 | 紧贴 |
-| 椽条中心 | 顶面 − `rafterHalfH×cos(angle)` | Box 旋转后偏移 |
+| 椽条中心 | 顶面 − `rafterHalfH×cos(angle)` | Box 旋转后半高 |
 | 椽条底面 | 中心 − `rafterHalfH×cos(angle)` | |
 
 #### 檩条（中层）
 
 - 沿 X 轴水平布置，支撑椽条
-- 截面：BoxGeometry(interiorW, purlinH, purlinW)，宽 8cm × 高 10cm × 内宽
+- 截面：BoxGeometry(interiorW, 10cm, 8cm)
 - 每坡 4 根，Z 向均匀分布
 - 顶面紧贴椽条底面
-- 材质：`purlinMat`（深木色）
 
-#### 屋脊梁（底层）
+#### 屋脊梁
 
-- 位于屋脊正下方，支撑顶部椽条交汇处
-- 截面：BoxGeometry(interiorW, 0.18, 0.14)
-- 顶面紧贴椽条底面（屋脊处计算实际位置）
-- 材质：`purlinMat`
-
-### 旋转与坐标映射
-
-当 `rotation.x` 使 BoxGeometry 倾斜时，box 的局部 Y（高度方向）在 world Y 的投影 = `halfHeight × cos(angle)`。这个值用于计算各层之间的精确偏移量，确保构件紧贴无间隙。
-
-参见 CLAUDE.md 中的"Three.js 旋转与坐标映射"章节。
+- 位于屋脊正下方
+- 截面：BoxGeometry(interiorW, 18cm, 14cm)
+- 顶面紧贴椽条底面（屋脊处按实际位置计算）
