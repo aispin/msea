@@ -43,30 +43,73 @@ export function createRoof(): THREE.Group {
   const roofAngle = Math.atan2(triH, roofLen / 2)
   const TILE_THICK = 0.03
 
-  // ─── 瓦片 (外层, 含出挑) ─────────────────────────
-  const roofLenWithOverhang = roofLen + 2 * overhang + WL
-  const halfTile = roofLenWithOverhang / 2              // 瓦片半跨 ~2.93m
-  const tileBaseZ = zStart - WL / 2 - overhang           // 前檐口Z ~3.045m
-  const ridgeZ = tileBaseZ + halfTile                     // 屋脊Z ~5.975m
-  const tileTopY = eaveH + triH / 2                       // 瓦片上表面中点Y
+  // ─── 自下而上建造: 椽条定义坡度 → 瓦片继承 ──────
+  const rafterHalfH = 0.05
+  const rafterDY = rafterHalfH * Math.cos(roofAngle)
+  const wallTopY = eaveH
+  const rafterTopAtWall = wallTopY + 2 * rafterDY  // 墙顶处椽条顶面Y
 
+  // 外墙位置
+  const frontWallExt = zStart - WL / 2
+  const backWallExt  = zStart + roofLen + WL
+
+  // 1) 椽条 — 搭墙头5cm, ridge取两面外墙中点, 对称
+  const interiorW = HW
+  const wallInset = 0.05
+  const rafterStartZ = frontWallExt + wallInset
+  const rafterEndZ   = backWallExt  - wallInset
+  const rafterRidgeZ = (frontWallExt + backWallExt) / 2       // 屋脊在两面外墙中点
+  const rafterTopAtRidge = rafterTopAtWall + (rafterRidgeZ - rafterStartZ) * Math.tan(roofAngle)
+
+  const rafterSlopeLen = Math.sqrt((rafterRidgeZ - rafterStartZ) ** 2 + (rafterTopAtRidge - rafterTopAtWall) ** 2)
+  const rafterMat = new THREE.MeshStandardMaterial({ color: 0x8b6914, roughness: 0.7 })
+  const rafterCount = Math.ceil(interiorW / 0.4)
+  const rafterGeo = new THREE.BoxGeometry(0.06, 0.10, rafterSlopeLen)
+
+  for (let i = 0; i <= rafterCount; i++) {
+    const rx = WL + (i / rafterCount) * interiorW
+    const rf = new THREE.Mesh(rafterGeo, rafterMat)
+    rf.rotation.set(-roofAngle, 0, 0)
+    const rfCZ = rafterStartZ + (rafterRidgeZ - rafterStartZ) / 2
+    const rfCY = wallTopY + rafterDY + (rfCZ - rafterStartZ) * Math.tan(roofAngle)
+    rf.position.set(rx, rfCY, rfCZ)
+    group.add(rf)
+
+    const rb = new THREE.Mesh(rafterGeo, rafterMat)
+    rb.rotation.set(roofAngle, 0, 0)
+    const rbCZ = rafterRidgeZ + (rafterEndZ - rafterRidgeZ) / 2
+    const rbCY = wallTopY + rafterDY + (rafterEndZ - rbCZ) * Math.tan(roofAngle)
+    rb.position.set(rx, rbCY, rbCZ)
+    group.add(rb)
+  }
+
+  // 2) 瓦片 — 搭在椽条上方, 同坡度
+  const tileBaseZ = frontWallExt
+  const tileBackZ = backWallExt + overhang
+  const tileRidgeZ = rafterRidgeZ                            // 瓦片屋脊与椽条对齐
+  const tileRidgeTop = rafterTopAtRidge + TILE_THICK
+  const tileRidgeBot = rafterTopAtRidge
+
+  const frontEaveTop = rafterTopAtWall + TILE_THICK - (rafterStartZ - tileBaseZ) * Math.tan(roofAngle)
+  const backEaveTop  = rafterTopAtWall + TILE_THICK - (tileBackZ - rafterEndZ)  * Math.tan(roofAngle)
+
+  // makeTile + 组装
   roofMat.side = THREE.DoubleSide
-
+  const halfTileLen = tileRidgeZ - tileBaseZ
   function makeTile(x0: number, z0: number, y0: number, zR: number): THREE.Mesh {
     const hw = roofWidth / 2
     const geo = new THREE.BufferGeometry()
-    // 8顶点: 上层4 + 下层4(偏移 -TILE_THICK)
     const verts = new Float32Array([
-      x0 - hw, y0, z0,             x0 + hw, y0, z0,
-      x0 - hw, ridgeH, zR,         x0 + hw, ridgeH, zR,
+      x0 - hw, y0, z0,              x0 + hw, y0, z0,
+      x0 - hw, tileRidgeTop, zR,    x0 + hw, tileRidgeTop, zR,
       x0 - hw, y0 - TILE_THICK, z0, x0 + hw, y0 - TILE_THICK, z0,
-      x0 - hw, ridgeH - TILE_THICK, zR, x0 + hw, ridgeH - TILE_THICK, zR,
+      x0 - hw, tileRidgeBot, zR,    x0 + hw, tileRidgeBot, zR,
     ])
     geo.setAttribute('position', new THREE.BufferAttribute(verts, 3))
     geo.setIndex([
-      0,2,1, 1,2,3,  4,5,6, 5,7,6,  // 上+下面
-      0,4,2, 2,4,6,  1,3,5, 3,7,5,  // 左右侧面
-      0,1,4, 1,5,4,  2,6,3, 3,6,7,  // 前后侧面
+      0,2,1, 1,2,3,  4,5,6, 5,7,6,
+      0,4,2, 2,4,6,  1,3,5, 3,7,5,
+      0,1,4, 1,5,4,  2,6,3, 3,6,7,
     ])
     geo.computeVertexNormals()
     const m = new THREE.Mesh(geo, roofMat)
@@ -74,40 +117,14 @@ export function createRoof(): THREE.Group {
     return m
   }
 
-  group.add(makeTile(totalX / 2, tileBaseZ, eaveH, ridgeZ))                    // 前坡
-  group.add(makeTile(totalX / 2, tileBaseZ + roofLenWithOverhang, eaveH, ridgeZ)) // 后坡
+  group.add(makeTile(totalX / 2, tileBaseZ, frontEaveTop, tileRidgeZ))
+  group.add(makeTile(totalX / 2, tileBackZ, backEaveTop, tileRidgeZ))
 
-  // ─── 椽条 (内层, 墙到墙) ─────────────────────────
-  const interiorW = HW
-  const halfRafter = roofLen / 2                                     // 内净半跨 2.775m
-  const rafterSlopeLen = Math.sqrt(halfRafter ** 2 + triH ** 2)     // 坡面实长 ~3.33m
-  const rafterHalfH = 0.05                                           // 截面高10cm → 半高5cm
-  // 椽条顶面 = 瓦片底面 → midY = tileBottom - rafterHalfH*cos(angle)
-  const tileBottomY = tileTopY - TILE_THICK
-  const rafterMidY = tileBottomY - rafterHalfH * Math.cos(roofAngle)
-  const rafterMat = new THREE.MeshStandardMaterial({ color: 0x8b6914, roughness: 0.7 })
-  const rafterCount = Math.ceil(interiorW / 0.4)
-  const rafterGeo = new THREE.BoxGeometry(0.06, 0.10, rafterSlopeLen)
-
-  for (let i = 0; i <= rafterCount; i++) {
-    const rx = WL + (i / rafterCount) * interiorW
-    // 前坡 — 搁在A-B墙(zStart)到屋脊(zStart+halfRafter)
-    const rf = new THREE.Mesh(rafterGeo, rafterMat)
-    rf.rotation.set(-roofAngle, 0, 0)
-    rf.position.set(rx, rafterMidY, zStart + halfRafter / 2)
-    group.add(rf)
-    // 后坡 — 搁在屋脊到NE墙(zStart+roofLen)
-    const rb = new THREE.Mesh(rafterGeo, rafterMat)
-    rb.rotation.set(roofAngle, 0, 0)
-    rb.position.set(rx, rafterMidY, zStart + halfRafter + halfRafter / 2)
-    group.add(rb)
-  }
-
-  // ─── 山墙 ─────────────────────────────────────────
+  // ─── 山墙 (根据实际瓦片顶点) ──────────────────────
   const gableShape = new THREE.Shape()
-  gableShape.moveTo(0, 0)
-  gableShape.lineTo(roofLenWithOverhang / 2, triH)
-  gableShape.lineTo(roofLenWithOverhang, 0)
+  gableShape.moveTo(0, frontEaveTop - eaveH)
+  gableShape.lineTo(tileRidgeZ - tileBaseZ, tileRidgeTop - eaveH)
+  gableShape.lineTo(tileBackZ - tileBaseZ, backEaveTop - eaveH)
   gableShape.closePath()
   const gableGeo = new THREE.ShapeGeometry(gableShape)
 

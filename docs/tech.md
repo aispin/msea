@@ -44,6 +44,16 @@
 
 瓦片直接搭在椽条上，椽条架在檩条上，檩条由梁支撑。所有构件共享同一个坡度角。
 
+### 自下而上的建造逻辑
+
+建造顺序：**椽条 → 瓦片**。每一层在下一层基础上计算叠加。
+
+**屋脊定位**：取前外墙和后外墙的中点，确保前后对称。
+```
+ridgeZ = (frontWallExt + backWallExt) / 2
+```
+前后椽条从此中点分别向两端下降，在同一高度交汇。
+
 ### 坡度计算
 
 坡度由内净尺寸决定，瓦片和椽条使用完全相同的坡度：
@@ -51,27 +61,28 @@
 ```
 triH       = ridgeH - eaveH = 5.0 - 3.15 = 1.85m
 roofLen    = lB + lC = 3.0 + 2.55 = 5.55m（B+C 内净总长）
-halfRoof   = roofLen / 2 = 2.775m（内净半跨）
-roofAngle  = atan2(triH, halfRoof) ≈ 33.7°
+roofAngle  = atan2(triH, roofLen/2) ≈ 33.7°
 ```
 
-**关键**：坡度角基于内净 `roofLen/2`，出挑不影响坡度。瓦片和椽条使用相同的 `roofAngle`，瓦片仅是比椽条更长（向外延伸到出挑边缘）。
 
 ### 构件尺寸与定位
 
-#### 瓦片（外层）
+#### 椽条（内层，先建）
 
-- 覆盖范围：含出挑 + 墙厚
-- Z 总跨度：`roofLenWithOverhang = roofLen + 2×overhang + WL`
-- 厚度：3cm，DoubleSide
-- 实现：自定义 BufferGeometry（8 顶点，上下两层 + 四侧面）
+1. 搁在墙顶上（外墙表面内侧 5cm）
+2. 坡度 `roofAngle`，从 `rafterStartZ` 上升到 `ridgeZ`（前坡），从 `ridgeZ` 降到 `rafterEndZ`（后坡）
+3. 椽底 Y = `wallTopY`（墙顶），椽中心 Y = `wallTopY + rafterDY`，椽顶 Y = `wallTopY + 2 × rafterDY`
+4. 椽顶在 ridge 处：`rafterTopAtRidge = rafterTopAtWall + (ridgeZ - rafterStartZ) × tan(roofAngle)`
+5. 截面：BoxGeometry(0.06, 0.10, slopeLen)，间距 40cm
 
-#### 椽条（内层）
+#### 瓦片（外层，椽条上方）
 
-- 覆盖范围：Z 从 `zStart` 到 `zStart + roofLen`（墙到墙）
-- 半跨：`halfRafter = roofLen / 2`
-- 截面：BoxGeometry(0.06, 0.10, slopeLen)，宽 6cm × 高 10cm × 坡长
-- 间距：40cm
+1. 瓦底 = 椽顶，同坡度 `roofAngle`
+2. 前檐口：齐平前墙外表面（无出挑）
+3. 后檐口：出挑 8cm 超过后墙外表面
+4. 檐口高度 = `椽顶在墙处 + TILE_THICK − 出挑水平距 × tan(roofAngle)`
+5. 屋脊高度 = `rafterTopAtRidge + TILE_THICK`
+6. 厚度：3cm，DoubleSide，8 顶点 BufferGeometry
 
 #### 层级 Y 偏移
 
