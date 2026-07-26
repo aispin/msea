@@ -11,8 +11,9 @@ export function createDoor(): THREE.Group {
   const doorT = DIMENSIONS.door.thickness // 0.08m
   const halfW = doorW / 2                 // 0.5m per leaf
 
-  const HW = DIMENSIONS.houseWidth
-  const doorCenterX = HW / 2 // 门在SW墙正中
+  const WL = 0.15  // 墙厚
+  const totalX = WL + DIMENSIONS.houseWidth + WL  // 建筑总宽
+  const doorCenterX = totalX / 2  // 门在SW墙正中
 
   // 左扇门
   const leftGeo = new THREE.BoxGeometry(halfW - 0.01, doorH, doorT)
@@ -83,8 +84,8 @@ export function createDoor(): THREE.Group {
     group.add(ir)
   }
 
-  // 门放置在 SW墙 z=0 处
-  group.position.set(0, 0, 0)
+  // 门放置在 SW墙中心 Z=WL/2 处
+  group.position.set(0, 0, WL / 2)
 
   return group
 }

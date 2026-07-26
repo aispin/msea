@@ -39,7 +39,7 @@ export const DIMENSIONS = {
     totalLength: 5.55, // B.length + C.length
     ridgeHeight: 5.0,
     eaveHeight: 3.15,
-    overhang: 0.2,     // 屋檐出挑
+    overhang: 0.08,    // 屋檐出挑
   },
 
   /** 过道 */
@@ -122,8 +122,8 @@ export const LIGHTING = {
 } as const
 
 export const CAMERA = {
-  initialPosition: [1.28, 3.5, -6] as [number, number, number],
-  lookAt: [1.28, 2.0, 4.225] as [number, number, number],
+  initialPosition: [1.43, 3.5, -6] as [number, number, number],
+  lookAt: [1.43, 2.0, 4.45] as [number, number, number],
   fov: 50,
   near: 0.1,
   far: 80,
@@ -131,10 +131,18 @@ export const CAMERA = {
   maxDistance: 30,
 } as const
 
-/** 区域位置计算 (Z轴起点偏移) */
+/** 区域位置计算 — 以SW墙外表面为Z=0，内净尺寸+墙厚 */
+const WL = 0.15 // 墙厚
+const lA = DIMENSIONS.zoneA.length  // 2.9
+const lB = DIMENSIONS.zoneB.length  // 3.0
+const lC = DIMENSIONS.zoneC.length  // 2.55
+
 export const ZONE_OFFSETS = {
-  zoneAStart: 0,                          // Z=0, 西南端
-  zoneBStart: DIMENSIONS.zoneA.length,     // Z=2.9
-  zoneCStart: DIMENSIONS.zoneA.length + DIMENSIONS.zoneB.length, // Z=5.9
-  totalLength: DIMENSIONS.zoneA.length + DIMENSIONS.zoneB.length + DIMENSIONS.zoneC.length, // 8.45
+  /** SW墙外表面 */     wallSW: 0,
+  /** A区内净起始 */     zoneAStart: WL,
+  /** A-B墙SW面 */      wallAB_SW: WL + lA,
+  /** A-B墙NE面 / B区内净起始 */ zoneBStart: WL + lA + WL,
+  /** C区内净起始 */     zoneCStart: WL + lA + WL + lB,
+  /** NE墙内表面 */      wallNE_inner: WL + lA + WL + lB + lC,
+  /** NE墙外表面 / 建筑总长 */ totalLength: WL + lA + WL + lB + lC + WL,
 } as const

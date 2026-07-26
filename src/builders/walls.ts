@@ -2,15 +2,13 @@ import * as THREE from 'three'
 import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
 import { createWallMaterial } from '../materials'
 
-const WALL_THICKNESS = 0.15
-const HW = DIMENSIONS.houseWidth
-const WL = WALL_THICKNESS
+const WL = 0.15  // 墙厚
+const HW = DIMENSIONS.houseWidth  // 2.56 内净宽
 
-/** 创建一面墙: 中心在 (cx, cy, cz), 尺寸 (sx, sy, sz) */
-function makeWall(
-  cx: number, cy: number, cz: number,
-  sx: number, sy: number, sz: number
-): THREE.Mesh {
+/** 建筑总宽(外墙外到外) */
+const totalX = WL + HW + WL  // 2.86
+
+function makeWall(cx: number, cy: number, cz: number, sx: number, sy: number, sz: number): THREE.Mesh {
   const geo = new THREE.BoxGeometry(sx, sy, sz)
   const mat = createWallMaterial()
   const mesh = new THREE.Mesh(geo, mat)
@@ -23,53 +21,78 @@ function makeWall(
 export function createWalls(): THREE.Group {
   const group = new THREE.Group()
 
-  const zA = ZONE_OFFSETS.zoneAStart
-  const zB = ZONE_OFFSETS.zoneBStart
-  const totalZ = ZONE_OFFSETS.totalLength
+  const hA = DIMENSIONS.zoneA.wallHeight    // 3.15
+  const hBC = DIMENSIONS.zoneB.eaveHeight    // 3.15
+  const lA = DIMENSIONS.zoneA.length         // 2.9
+  const lB = DIMENSIONS.zoneB.length         // 3.0
+  const lC = DIMENSIONS.zoneC.length         // 2.55
 
-  // --- A区墙体 ---
-  const hA = DIMENSIONS.zoneA.wallHeight
-  const lA = DIMENSIONS.zoneA.length
+  // 区域边界Z坐标
+  const z0 = ZONE_OFFSETS.wallSW             // 0   SW墙外
+  const zA = ZONE_OFFSETS.zoneAStart         // 0.15  A区起
+  const zAB = ZONE_OFFSETS.zoneBStart        // 3.20  B区起 (= A-B墙NE面)
+  const zC = ZONE_OFFSETS.zoneCStart         // 6.20  C区起
+  const zEnd = ZONE_OFFSETS.totalLength      // 8.90  建筑总长
+  const zAB_SW = ZONE_OFFSETS.wallAB_SW      // 3.05  A-B墙SW面
 
-  // A区 NW墙 (过道侧)
-  group.add(makeWall(-WL / 2, hA / 2, zA + lA / 2, WL, hA, lA))
-  // A区 SE墙 (邻居侧)
-  group.add(makeWall(HW + WL / 2, hA / 2, zA + lA / 2, WL, hA, lA))
-  // A区 SW墙 (正面, 门洞位置 - 分左右两段)
-  // 门的宽度1.0m, 左右各留0.78m墙体
-  const doorW = DIMENSIONS.door.width
-  const sideWallW = (HW - doorW) / 2 // 0.78m each side
-  // 左侧墙段 (从x=0到x=sideWallW)
-  group.add(makeWall(sideWallW / 2, hA / 2, zA, sideWallW, hA, WL))
-  // 右侧墙段 (从x=HW-sideWallW到x=HW)
-  group.add(makeWall(HW - sideWallW / 2, hA / 2, zA, sideWallW, hA, WL))
-  // 门过梁 (门上方墙体)
-  const doorH = DIMENSIONS.door.height
-  const lintelH = hA - doorH // 1.05m
-  group.add(makeWall(HW / 2, doorH + lintelH / 2, zA, HW, lintelH, WL))
+  // --- SW墙 (A区正面，入户门) ---
+  const doorW = DIMENSIONS.door.width        // 1.0
+  const doorH = DIMENSIONS.door.height       // 2.1
+  const sideWallW = (totalX - doorW) / 2    // (2.86-1.0)/2 = 0.93
+  const lintelH = hA - doorH                // 1.05
+  // 左侧段
+  group.add(makeWall(sideWallW / 2, hA / 2, WL / 2, sideWallW, hA, WL))
+  // 右侧段
+  group.add(makeWall(totalX - sideWallW / 2, hA / 2, WL / 2, sideWallW, hA, WL))
+  // 过梁
+  group.add(makeWall(totalX / 2, doorH + lintelH / 2, WL / 2, totalX, lintelH, WL))
 
-  // --- B区 + C区墙体 ---
-  const hBC = DIMENSIONS.zoneB.eaveHeight
-  const lBC = DIMENSIONS.zoneB.length + DIMENSIONS.zoneC.length
+  // --- NW墙 (过道侧) ---
+  // A区段
+  group.add(makeWall(WL / 2, hA / 2, zAB / 2, WL, hA, zAB))
+  // B+C区段
+  const zBC_len = zEnd - zAB
+  group.add(makeWall(WL / 2, hBC / 2, zAB + zBC_len / 2, WL, hBC, zBC_len))
 
-  // B+C NW墙 (过道侧)
-  group.add(makeWall(-WL / 2, hBC / 2, zB + lBC / 2, WL, hBC, lBC))
-  // B+C SE墙 (邻居侧, 无窗)
-  group.add(makeWall(HW + WL / 2, hBC / 2, zB + lBC / 2, WL, hBC, lBC))
-  // B+C NE墙 (背面)
-  group.add(makeWall(HW / 2, hBC / 2, totalZ, HW, hBC, WL))
+  // --- SE墙 (邻居侧) ---
+  const seX = totalX - WL / 2  // 外墙中心X
+  // A区段
+  group.add(makeWall(seX, hA / 2, zAB / 2, WL, hA, zAB))
+  // B+C区段
+  group.add(makeWall(seX, hBC / 2, zAB + zBC_len / 2, WL, hBC, zBC_len))
 
-  // --- A-B 承重墙 (z=2.9,隔开A区和B区, 中间门洞无门板) ---
-  const innerDoorW = DIMENSIONS.door.width   // 1.0m, 与入户门同宽
-  const innerDoorH = DIMENSIONS.door.height + 0.5  // 2.6m, 比入户门高50cm
-  const innerSideW = (HW - innerDoorW) / 2   // 0.78m
-  // 左侧墙段
-  group.add(makeWall(innerSideW / 2, hA / 2, zB, innerSideW, hA, WL))
-  // 右侧墙段
-  group.add(makeWall(HW - innerSideW / 2, hA / 2, zB, innerSideW, hA, WL))
-  // 门洞过梁 (2.6m以上到3.15m)
-  const innerLintelH = hA - innerDoorH  // 0.55m
-  group.add(makeWall(HW / 2, innerDoorH + innerLintelH / 2, zB, HW, innerLintelH, WL))
+  // --- NE墙 (背面) ---
+  group.add(makeWall(totalX / 2, hBC / 2, zEnd - WL / 2, totalX, hBC, WL))
+
+  // --- A-B 承重墙 (z=zAB_SW, 中间门洞1.0m宽x2.6m高) ---
+  const innerDoorH = doorH + 0.5  // 2.6m
+  const innerSideW = (totalX - doorW) / 2  // 0.93m
+  const innerLintelH = hA - innerDoorH     // 0.55m
+  const abWallZ = zAB_SW + WL / 2          // A-B墙中心Z
+  // 左侧段
+  group.add(makeWall(innerSideW / 2, hA / 2, abWallZ, innerSideW, hA, WL))
+  // 右侧段
+  group.add(makeWall(totalX - innerSideW / 2, hA / 2, abWallZ, innerSideW, hA, WL))
+  // 过梁
+  group.add(makeWall(totalX / 2, innerDoorH + innerLintelH / 2, abWallZ, totalX, innerLintelH, WL))
+
+  // --- 室内地板 ---
+  const floorMat = new THREE.MeshStandardMaterial({
+    color: 0xc4a46c, roughness: 0.7, metalness: 0.0,
+  })
+
+  function makeFloor(zStart: number, zLen: number): THREE.Mesh {
+    const geo = new THREE.PlaneGeometry(HW, zLen)
+    const mesh = new THREE.Mesh(geo, floorMat)
+    mesh.rotation.x = -Math.PI / 2
+    mesh.position.set(totalX / 2, 0.02, zStart + zLen / 2)
+    mesh.receiveShadow = true
+    return mesh
+  }
+
+  group.add(makeFloor(zA, lA))                          // A区地板
+  group.add(makeFloor(zAB, lB))                         // B区地板
+  group.add(makeFloor(zC, lC))                          // C区地板
 
   return group
 }

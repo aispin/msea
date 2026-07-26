@@ -7,27 +7,29 @@ export function createAttic(): THREE.Group {
   const woodMat = createAtticWoodMaterial()
   const parapetMat = createParapetMaterial()
 
+  const WL = 0.15
   const HW = DIMENSIONS.houseWidth
+  const totalX = WL + HW + WL
   const zC = ZONE_OFFSETS.zoneCStart
   const lC = DIMENSIONS.zoneC.length
-  const floorH = DIMENSIONS.zoneC.atticFloorHeight // 2.15m
+  const floorH = DIMENSIONS.zoneC.atticFloorHeight
 
   // 阁楼楼板
   const floorGeo = new THREE.BoxGeometry(HW, 0.08, lC)
   const floor = new THREE.Mesh(floorGeo, woodMat)
-  floor.position.set(HW / 2, floorH, zC + lC / 2)
+  floor.position.set(totalX / 2, floorH, zC + lC / 2)
   floor.castShadow = true
   floor.receiveShadow = true
   group.add(floor)
 
-  // 支柱 (4根)
+  // 支柱
   const pillarR = DIMENSIONS.attic.pillarRadius
   const pillarGeo = new THREE.CylinderGeometry(pillarR, pillarR, floorH, 8)
   const pillarPositions: [number, number, number][] = [
-    [0.15, floorH / 2, zC + 0.15],
-    [HW - 0.15, floorH / 2, zC + 0.15],
-    [0.15, floorH / 2, zC + lC - 0.15],
-    [HW - 0.15, floorH / 2, zC + lC - 0.15],
+    [WL + 0.15, floorH / 2, zC + 0.15],
+    [WL + HW - 0.15, floorH / 2, zC + 0.15],
+    [WL + 0.15, floorH / 2, zC + lC - 0.15],
+    [WL + HW - 0.15, floorH / 2, zC + lC - 0.15],
   ]
   for (const [px, py, pz] of pillarPositions) {
     const pillar = new THREE.Mesh(pillarGeo, woodMat)
@@ -39,50 +41,46 @@ export function createAttic(): THREE.Group {
   // A区天花板 + 天台围栏
   const hA = DIMENSIONS.zoneA.wallHeight
   const lA = DIMENSIONS.zoneA.length
+  const zA = ZONE_OFFSETS.zoneAStart
+  const zAB = ZONE_OFFSETS.zoneBStart
 
-  // 天花板 (平顶，在墙体顶部3.15m)
-  const ceilingGeoA = new THREE.PlaneGeometry(HW, lA)
+  // 天花板
+  const ceilingGeoA = new THREE.PlaneGeometry(HW + WL, lA + WL)
   const ceilingA = new THREE.Mesh(ceilingGeoA, createParapetMaterial())
   ceilingA.rotation.x = -Math.PI / 2
-  ceilingA.position.set(HW / 2, hA, lA / 2)
+  ceilingA.position.set(totalX / 2, hA, zA + lA / 2)
   ceilingA.receiveShadow = true
   group.add(ceilingA)
 
-  // 女儿墙 (高0.9m)
+  // 女儿墙
   const parapetH = DIMENSIONS.zoneA.parapetHeight
   const parapetT = 0.1
   const parapetY = hA + parapetH / 2
-
-  // NW侧围栏
+  const extSW = 0  // SW墙外
+  const extSE = WL + HW + WL
+  // NW/SW/SE/NE 四面围栏
   const nwParapet = new THREE.Mesh(
-    new THREE.BoxGeometry(parapetT, parapetH, lA),
-    parapetMat
+    new THREE.BoxGeometry(parapetT, parapetH, zAB - extSW), parapetMat
   )
-  nwParapet.position.set(0, parapetY, lA / 2)
+  nwParapet.position.set(extSW + parapetT / 2, parapetY, (extSW + zAB) / 2)
   group.add(nwParapet)
 
-  // SE侧围栏
   const seParapet = new THREE.Mesh(
-    new THREE.BoxGeometry(parapetT, parapetH, lA),
-    parapetMat
+    new THREE.BoxGeometry(parapetT, parapetH, zAB - extSW), parapetMat
   )
-  seParapet.position.set(HW, parapetY, lA / 2)
+  seParapet.position.set(extSE - parapetT / 2, parapetY, (extSW + zAB) / 2)
   group.add(seParapet)
 
-  // SW侧围栏 (正面，有缺口对应门上方? 不——门在墙上，围栏在顶部)
   const swParapet = new THREE.Mesh(
-    new THREE.BoxGeometry(HW, parapetH, parapetT),
-    parapetMat
+    new THREE.BoxGeometry(extSE - extSW, parapetH, parapetT), parapetMat
   )
-  swParapet.position.set(HW / 2, parapetY, 0)
+  swParapet.position.set((extSW + extSE) / 2, parapetY, extSW + parapetT / 2)
   group.add(swParapet)
 
-  // NE侧围栏 (与B区共墙上方)
   const neParapet = new THREE.Mesh(
-    new THREE.BoxGeometry(HW, parapetH, parapetT),
-    parapetMat
+    new THREE.BoxGeometry(extSE - extSW, parapetH, parapetT), parapetMat
   )
-  neParapet.position.set(HW / 2, parapetY, lA)
+  neParapet.position.set((extSW + extSE) / 2, parapetY, zAB - parapetT / 2)
   group.add(neParapet)
 
   return group

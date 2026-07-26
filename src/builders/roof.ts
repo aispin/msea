@@ -7,46 +7,42 @@ export function createRoof(): THREE.Group {
   const roofMat = createRoofMaterial()
   const wallMat = createWallMaterial()
 
+  const WL = 0.15
   const HW = DIMENSIONS.houseWidth
+  const totalX = WL + HW + WL
   const eaveH = DIMENSIONS.roof.eaveHeight
   const ridgeH = DIMENSIONS.roof.ridgeHeight
-  const roofLen = DIMENSIONS.roof.totalLength  // 5.55m, B+C沿Z轴
-  const overhang = DIMENSIONS.roof.overhang     // 0.2m
-  const zStart = ZONE_OFFSETS.zoneBStart        // 2.9
-  const triH = ridgeH - eaveH                    // 1.85m
+  const overhang = DIMENSIONS.roof.overhang
+  const sideOverhang = WL / 2 + 0.08
+  const roofWidth = totalX + sideOverhang * 2  // 含侧边出挑
+  const roofLen = DIMENSIONS.roof.totalLength  // 5.55 (B+C内净)
+  const zStart = ZONE_OFFSETS.zoneBStart       // B区起始
+  const zEnd = ZONE_OFFSETS.totalLength         // 建筑总长
+  const triH = ridgeH - eaveH
 
-  // 三角形截面（ZY平面→世界Z=shapeX, 世界Y=shapeY, 沿X挤出=世界X）
-  // 坡面朝前(SW)和后(NE)，脊沿X轴(NW→SE)
-  const roofLenWithOverhang = roofLen + 2 * overhang
+  const roofLenWithOverhang = roofLen + 2 * overhang + WL
   const shape = new THREE.Shape()
-  shape.moveTo(0, 0)                                  // SW檐口
-  shape.lineTo(roofLenWithOverhang / 2, triH)          // 屋脊
-  shape.lineTo(roofLenWithOverhang, 0)                  // NE檐口
-  shape.lineTo(roofLenWithOverhang, -0.1)               // 底部
+  shape.moveTo(0, 0)
+  shape.lineTo(roofLenWithOverhang / 2, triH)
+  shape.lineTo(roofLenWithOverhang, 0)
+  shape.lineTo(roofLenWithOverhang, -0.1)
   shape.lineTo(0, -0.1)
   shape.closePath()
 
-  const roofGeo = new THREE.ExtrudeGeometry(shape, {
-    steps: 1,
-    depth: HW,
-    bevelEnabled: false,
-  })
+  const roofGeo = new THREE.ExtrudeGeometry(shape, { steps: 1, depth: roofWidth, bevelEnabled: false })
   const roofMesh = new THREE.Mesh(roofGeo, roofMat)
-  // 旋转: shape的X→世界Z, shape的Y→世界Y, 挤出Z→世界X
   roofMesh.rotation.y = -Math.PI / 2
-  roofMesh.position.set(HW, eaveH, zStart - overhang)
+  roofMesh.position.set(totalX + sideOverhang, eaveH, zStart - WL / 2 - overhang)
   roofMesh.castShadow = true
   roofMesh.receiveShadow = true
   group.add(roofMesh)
 
-  // B+C 天花板封板
-  const ceilingGeo = new THREE.PlaneGeometry(HW, roofLen)
+  const ceilingGeo = new THREE.PlaneGeometry(roofWidth, roofLen)
   const ceiling = new THREE.Mesh(ceilingGeo, wallMat)
   ceiling.rotation.x = -Math.PI / 2
-  ceiling.position.set(HW / 2, eaveH, zStart + roofLen / 2)
+  ceiling.position.set(totalX / 2, eaveH, zStart + roofLen / 2)
   group.add(ceiling)
 
-  // 山墙 — NW侧(X=0) 和 SE侧(X=HW)
   const gableShape = new THREE.Shape()
   gableShape.moveTo(0, 0)
   gableShape.lineTo(roofLenWithOverhang / 2, triH)
@@ -54,16 +50,14 @@ export function createRoof(): THREE.Group {
   gableShape.closePath()
   const gableGeo = new THREE.ShapeGeometry(gableShape)
 
-  // NW山墙，面朝-X
   const gableNW = new THREE.Mesh(gableGeo, wallMat)
   gableNW.rotation.y = -Math.PI / 2
-  gableNW.position.set(0, eaveH, zStart - overhang)
+  gableNW.position.set(-sideOverhang, eaveH, zStart - WL / 2 - overhang)
   group.add(gableNW)
 
-  // SE山墙，面朝+X
   const gableSE = new THREE.Mesh(gableGeo, wallMat)
   gableSE.rotation.y = -Math.PI / 2
-  gableSE.position.set(HW, eaveH, zStart - overhang)
+  gableSE.position.set(totalX + sideOverhang, eaveH, zStart - WL / 2 - overhang)
   group.add(gableSE)
 
   return group

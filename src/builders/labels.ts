@@ -27,40 +27,37 @@ function createTextSprite(text: string, fontSize: number, bgColor: number): THRE
 export function createLabels(): THREE.Group {
   const group = new THREE.Group()
 
+  const WL = 0.15
   const HW = DIMENSIONS.houseWidth
+  const totalX = WL + HW + WL
   const zA = ZONE_OFFSETS.zoneAStart
   const zB = ZONE_OFFSETS.zoneBStart
   const zC = ZONE_OFFSETS.zoneCStart
+  const zEnd = ZONE_OFFSETS.totalLength
   const lA = DIMENSIONS.zoneA.length
   const lB = DIMENSIONS.zoneB.length
   const lC = DIMENSIONS.zoneC.length
-  const totalLen = ZONE_OFFSETS.totalLength
   const hA = DIMENSIONS.zoneA.wallHeight
   const hBC = DIMENSIONS.zoneB.eaveHeight
 
-  // A区标签
   const labelA = createTextSprite('A区', 48, 0x333333)
-  labelA.position.set(HW / 2, hA + 0.8, zA + lA / 2)
+  labelA.position.set(totalX / 2, hA + 0.8, zA + lA / 2)
   group.add(labelA)
 
-  // B区标签
   const labelB = createTextSprite('B区', 48, 0x333333)
-  labelB.position.set(HW / 2, hBC + 0.8, zB + lB / 2)
+  labelB.position.set(totalX / 2, hBC + 0.8, zB + lB / 2)
   group.add(labelB)
 
-  // C区标签
   const labelC = createTextSprite('C区', 48, 0x333333)
-  labelC.position.set(HW / 2, hBC + 0.8, zC + lC / 2)
+  labelC.position.set(totalX / 2, hBC + 0.8, zC + lC / 2)
   group.add(labelC)
 
-  // 方向标识 (N/S/E/W) 地面固定 — 与罗盘方向一致
-  // 相机在-Z看+Z时屏幕左=世界+X，故N/W在+X侧(屏幕左)，S/E在-X侧(屏幕右)
   const margin = 4.0
   const dirY = 0.05
-  const cx = HW / 2
-  const cz = totalLen / 2
-  const dist = Math.max(totalLen, HW) / 2 + margin
-  const cos45 = Math.SQRT1_2 // ≈0.707
+  const cx = totalX / 2
+  const cz = zEnd / 2
+  const dist = Math.max(zEnd, totalX) / 2 + margin
+  const cos45 = Math.SQRT1_2
   const dirData: [string, number, number][] = [
     ['N', cx + dist * cos45, cz + dist * cos45],
     ['S', cx - dist * cos45, cz - dist * cos45],
@@ -73,7 +70,6 @@ export function createLabels(): THREE.Group {
     sprite.scale.set(0.8, 0.4, 1)
     group.add(sprite)
   }
-
 
   return group
 }

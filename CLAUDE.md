@@ -11,7 +11,7 @@
 
 - 依赖版本保持最新。升级时直接改 `package.json` + `npm install`，不要手动编辑 `package-lock.json`
 - Node 版本遵循 `deploy.yml` 中的 `node-version`（当前 26）
-- **禁止未经明确命令执行 `git push`**——只在用户明确要求推送/部署时才 push
+- **禁止自动 `git push` 到远程仓库**，仅在用户明确要求推送/部署时才执行。本地 commit 不受限制
 - Node 版本遵循 `deploy.yml` 中的 `node-version`（当前 26）
 
 ## 项目架构
@@ -37,6 +37,21 @@ src/
 
 - 世界坐标系: +Z=东北(远), -Z=西南(近), -X=西北, +X=东南
 - 视觉映射: 相机在-Z看向+Z → 屏幕左=世界+X, 屏幕右=世界-X
+
+## Three.js 旋转与坐标映射
+
+`rotation.y` 会改变 local 轴和 world 轴的对应关系，**`position` 设置的是旋转后的原点位置**，不是几何中心。
+
+| rotation.y | local X (窗宽) | local Z (面朝向) | position.z 含义 |
+|---|---|---|---|
+| `π/2` | → world **-Z** | → world **+X** (SE) | 窗**右**边界 |
+| `-π/2` | → world **+Z** | → world **-X** (NW) | 窗**左**边界 |
+
+计算窗中心在世界 Z 的位置：
+- `rotation.y = π/2`：`centerZ = position.z - width/2`
+- `rotation.y = -π/2`：`centerZ = position.z + width/2`
+
+**常见陷阱**：公式里 `width/2` 的正负号取决于旋转方向，用反会导致整窗偏移一个窗宽。
 - 所有材质程序生成，无外部纹理文件
 - `npm run build` = `tsc -b && vite build`
 - Tailwind 入口: `src/index.css` 中用 `@import "tailwindcss"`（无 `@tailwind` 指令）
