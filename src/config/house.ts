@@ -58,10 +58,12 @@ export const DIMENSIONS = {
 
   /** 入户门 */
   door: {
-    width: 1.0,
-    height: 2.1,
+    width: 0.88,
+    height: 2.0,
     thickness: 0.08,
-    panelSplit: 0.5,   // 双开门中线
+    innerWidth: 1.06,
+    innerHeight: 2.58,
+    frameWidth: 0.05,  // 内门木框宽5cm
   },
 
   /** 阁楼 */

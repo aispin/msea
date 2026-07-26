@@ -135,11 +135,7 @@ export default function Scene3D({ onCameraReady }: Props) {
       LIGHTING.ambient.color,
       LIGHTING.ambient.intensity
     ))
-    threeScene.add(new THREE.HemisphereLight(
-      LIGHTING.hemisphere.skyColor,
-      LIGHTING.hemisphere.groundColor,
-      LIGHTING.hemisphere.intensity
-    ))
+    // 半球光已移除 — 室内不应有阳光直射
 
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement)
@@ -283,22 +279,33 @@ export default function Scene3D({ onCameraReady }: Props) {
       ) : (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-black/50 text-white/70 px-5 py-2 rounded-full text-sm pointer-events-none select-none">按 ESC 退出漫游</div>
       )}
-      {/* 操作提示 */}
-      {tourMode && (
-        <div className="absolute top-32 right-4 z-10 bg-black/60 text-white/80 rounded-lg px-4 py-3 text-xs leading-relaxed hidden md:block">
-          <p className="font-bold mb-1">移动</p><p>W A S D / ↑ ← ↓ →</p>
-          <p className="font-bold mt-2 mb-1">环顾</p><p>移动鼠标</p>
-          <p className="font-bold mt-2 mb-1">退出</p><p>按 ESC 键</p>
-        </div>
-      )}
+      {/* 操作提示 — 常驻 */}
+      <div className="absolute top-32 right-4 z-10 bg-black/60 text-white/80 rounded-lg px-4 py-3 text-xs leading-relaxed hidden md:block">
+        {tourMode ? (
+          <>
+            <p className="font-bold mb-1">移动</p><p>W A S D / ↑ ← ↓ →</p>
+            <p className="font-bold mt-2 mb-1">环顾</p><p>移动鼠标</p>
+            <p className="font-bold mt-2 mb-1">退出</p><p>按 ESC 键</p>
+          </>
+        ) : (
+          <>
+            <p className="font-bold mb-1">旋转</p><p>鼠标左键拖拽</p>
+            <p className="font-bold mt-2 mb-1">缩放</p><p>滚轮</p>
+            <p className="font-bold mt-2 mb-1">平移</p><p>鼠标中键拖拽</p>
+          </>
+        )}
+        <p className="font-bold mt-2 mb-1">标注</p><p>按 D 键 切换</p>
+      </div>
 
-      {/* 移动端虚拟摇杆 + 环顾 */}
-      <MobileControls
+      {/* 移动端虚拟摇杆 + 环顾 (仅触摸设备) */}
+      {'ontouchstart' in window && (
+        <MobileControls
         inTour={tourMode}
         onMove={handleMobileMove}
         onLook={handleMobileLook}
         onToggle={() => exitTourRef.current()}
       />
+      )}
     </>
   )
 }

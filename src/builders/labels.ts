@@ -29,29 +29,7 @@ export function createLabels(): THREE.Group {
   const WL = 0.15
   const HW = DIMENSIONS.houseWidth
   const totalX = WL + HW + WL
-  const zA = ZONE_OFFSETS.zoneAStart
-  const zB = ZONE_OFFSETS.zoneBStart
-  const zC = ZONE_OFFSETS.zoneCStart
   const zEnd = ZONE_OFFSETS.totalLength
-  const lA = DIMENSIONS.zoneA.length
-  const lB = DIMENSIONS.zoneB.length
-  const lC = DIMENSIONS.zoneC.length
-
-  // A/B/C 标签放在各区内净地板上
-  const labelA = makeSprite('A区', 48, 0x333333)
-  labelA.position.set(totalX / 2, 0.05, zA + lA / 2)
-  labelA.scale.set(0.8, 0.4, 1)
-  group.add(labelA)
-
-  const labelB = makeSprite('B区', 48, 0x333333)
-  labelB.position.set(totalX / 2, 0.05, zB + lB / 2)
-  labelB.scale.set(0.8, 0.4, 1)
-  group.add(labelB)
-
-  const labelC = makeSprite('C区', 48, 0x333333)
-  labelC.position.set(totalX / 2, 0.05, zC + lC / 2)
-  labelC.scale.set(0.8, 0.4, 1)
-  group.add(labelC)
 
   // N/S/E/W 地面方向标识
   const margin = 4.0

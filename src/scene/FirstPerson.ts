@@ -42,6 +42,7 @@ export class FirstPerson {
     document.addEventListener('keyup', this.onKeyUp)
     document.addEventListener('mousemove', this.onMouseMove)
     document.addEventListener('pointerlockchange', this.onPointerLockChange)
+    document.addEventListener('keydown', this.onEscKey)
   }
 
   disable() {
@@ -51,6 +52,7 @@ export class FirstPerson {
     document.removeEventListener('keyup', this.onKeyUp)
     document.removeEventListener('mousemove', this.onMouseMove)
     document.removeEventListener('pointerlockchange', this.onPointerLockChange)
+    document.removeEventListener('keydown', this.onEscKey)
     this.keys.clear()
   }
 
@@ -97,6 +99,13 @@ export class FirstPerson {
 
   private onKeyDown = (e: KeyboardEvent) => { this.keys.add(e.code) }
   private onKeyUp = (e: KeyboardEvent) => { this.keys.delete(e.code) }
+
+  private onEscKey = (e: KeyboardEvent) => {
+    if (e.code === 'Escape' && this.enabled) {
+      this.disable()
+      this.onExternalDisable?.()
+    }
+  }
 
   private onMouseMove = (e: MouseEvent) => {
     if (!this.enabled) return

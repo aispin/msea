@@ -63,10 +63,13 @@ export function createWalls(): THREE.Group {
   // --- NE墙 (背面) ---
   group.add(makeWall(totalX / 2, hBC / 2, zEnd - WL / 2, totalX, hBC, WL))
 
-  // --- A-B 承重墙 (z=zAB_SW, 中间门洞1.0m宽x2.6m高) ---
-  const innerDoorH = doorH + 0.5  // 2.6m
-  const innerSideW = (totalX - doorW) / 2  // 0.93m
-  const innerLintelH = hA - innerDoorH     // 0.55m
+  // --- A-B 承重墙, 中间门洞 1.06m×2.58m, 褐红木框5cm ---
+  const innerDoorW = DIMENSIONS.door.innerWidth   // 1.06m
+  const innerDoorH = DIMENSIONS.door.innerHeight  // 2.58m
+  const innerSideW = (totalX - innerDoorW) / 2
+  const innerLintelH = hA - innerDoorH             // 0.57m
+  const frameW = DIMENSIONS.door.frameWidth        // 0.05m
+  const frameMat = new THREE.MeshStandardMaterial({ color: 0x6b2020, roughness: 0.5, metalness: 0.1 })
   const abWallZ = zAB_SW + WL / 2          // A-B墙中心Z
   // 左侧段
   group.add(makeWall(innerSideW / 2, hA / 2, abWallZ, innerSideW, hA, WL))
@@ -74,6 +77,17 @@ export function createWalls(): THREE.Group {
   group.add(makeWall(totalX - innerSideW / 2, hA / 2, abWallZ, innerSideW, hA, WL))
   // 过梁
   group.add(makeWall(totalX / 2, innerDoorH + innerLintelH / 2, abWallZ, totalX, innerLintelH, WL))
+  // 内门木框 (褐红色, 宽5cm)
+  function addFrame(cx: number, cy: number, cz: number, sx: number, sy: number, sz: number) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), frameMat)
+    m.position.set(cx, cy, cz); group.add(m)
+  }
+  // 上框
+  addFrame(totalX / 2, innerDoorH + frameW / 2, abWallZ + WL / 2 + frameW / 2, innerDoorW + frameW * 2, frameW, frameW)
+  // 左框
+  addFrame(innerSideW / 2, innerDoorH / 2, abWallZ + WL / 2 + frameW / 2, frameW, innerDoorH, frameW)
+  // 右框
+  addFrame(totalX - innerSideW / 2, innerDoorH / 2, abWallZ + WL / 2 + frameW / 2, frameW, innerDoorH, frameW)
 
   // --- 室内地板 (按区域微调颜色) ---
   function makeFloor(zStart: number, zLen: number, color: number): THREE.Mesh {

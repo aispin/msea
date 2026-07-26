@@ -61,18 +61,25 @@ export function createDimensions(): THREE.Group {
   }
   makeSeg(zA, lA, 'A区'); makeSeg(zB, lB, 'B区'); makeSeg(zC, lC, 'C区')
 
-  // ─── 总高 (Y轴) — SW角垂直虚线 ────────────────
-  const hx = 0; const hz = -0.3
-  group.add(dimLine([new THREE.Vector3(hx, 0, hz), new THREE.Vector3(hx, eaveH, hz)]))
-  group.add(dimText(`${eaveH.toFixed(2)}m`, new THREE.Vector3(hx, eaveH / 2, hz - 0.2)))
-  group.add(dimLine([new THREE.Vector3(hx, eaveH, hz), new THREE.Vector3(hx, ridgeH, hz)]))
-  group.add(dimText(`${ridgeH.toFixed(2)}m`, new THREE.Vector3(hx, (eaveH + ridgeH) / 2, hz - 0.2)))
+  // ─── 总高 — NW墙外屋脊处 ──────────────────────
+  const hxNW = -0.3
+  const hzRidge = ZONE_OFFSETS.zoneBStart + DIMENSIONS.roof.totalLength / 2
+  group.add(dimLine([new THREE.Vector3(hxNW, 0, hzRidge), new THREE.Vector3(hxNW, eaveH, hzRidge)]))
+  group.add(dimText(`檐${eaveH.toFixed(2)}m`, new THREE.Vector3(hxNW - 0.2, eaveH / 2, hzRidge)))
+  group.add(dimLine([new THREE.Vector3(hxNW, eaveH, hzRidge), new THREE.Vector3(hxNW, ridgeH, hzRidge)]))
+  group.add(dimText(`脊${ridgeH.toFixed(2)}m`, new THREE.Vector3(hxNW - 0.2, (eaveH + ridgeH) / 2, hzRidge)))
 
   // ─── 入户门 — SW立面 ───────────────────────────
   const doorW = DIMENSIONS.door.width; const doorH = DIMENSIONS.door.height
   const dcx = totalX / 2
   group.add(dimLine([new THREE.Vector3(dcx - doorW / 2, doorH + 0.1, 0), new THREE.Vector3(dcx + doorW / 2, doorH + 0.1, 0)]))
-  group.add(dimText(`${doorW.toFixed(2)}×${doorH.toFixed(2)}m`, new THREE.Vector3(dcx, doorH + 0.3, -0.1)))
+  group.add(dimText(`外门${doorW.toFixed(2)}×${doorH.toFixed(2)}m`, new THREE.Vector3(dcx, doorH + 0.3, -0.1)))
+
+  // ─── 内门 — A-B墙 ──────────────────────────────
+  const iw = DIMENSIONS.door.innerWidth; const ih = DIMENSIONS.door.innerHeight
+  const iz = ZONE_OFFSETS.zoneBStart - WL / 2
+  group.add(dimLine([new THREE.Vector3(dcx - iw / 2, ih + 0.1, iz), new THREE.Vector3(dcx + iw / 2, ih + 0.1, iz)]))
+  group.add(dimText(`内门${iw.toFixed(2)}×${ih.toFixed(2)}m`, new THREE.Vector3(dcx, ih + 0.3, iz)))
 
   // ─── 窗户尺寸 — SE立面 ─────────────────────────
   const winW = DIMENSIONS.window.width; const winH = DIMENSIONS.window.height

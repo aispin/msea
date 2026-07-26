@@ -30,7 +30,7 @@ export default function House({ scene }: HouseProps) {
 
     // 尺寸标注 — 默认隐藏, D键切换
     const dims = createDimensions()
-    dims.visible = false
+    dims.visible = true  // 默认显示
     dims.userData.isDimGroup = true
     group.add(dims)
     dimGroup.current = dims
