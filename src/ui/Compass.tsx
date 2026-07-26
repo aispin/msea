@@ -31,7 +31,6 @@ export default function Compass({ camera }: CompassProps) {
       ctx.fillStyle = hexToRgba(COLORS.compassBg, 0.85); ctx.fill()
       ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2; ctx.stroke()
 
-      // 相机位置相对建筑中心的方位角 → 镜头朝向 = 方位角 + π
       const camAngle = Math.atan2(camera.position.x - centerX, camera.position.z - centerZ) + Math.PI
 
       const dirs: [string, number][] = [['N', -Math.PI/4], ['E', Math.PI/4], ['S', 3*Math.PI/4], ['W', -3*Math.PI/4]]
@@ -39,7 +38,7 @@ export default function Compass({ camera }: CompassProps) {
       ctx.font = 'bold 14px sans-serif'
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
       for (const [label, angle] of dirs) {
-        const a = angle - camAngle
+        const a = angle + camAngle
         ctx.fillText(label, cx + Math.sin(a)*(r-18), cy - Math.cos(a)*(r-18))
       }
 
