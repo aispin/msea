@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { COLORS } from '../config/house'
+import { COLORS, DIMENSIONS, ZONE_OFFSETS } from '../config/house'
 
 interface CompassProps { camera: THREE.Camera }
 
@@ -10,7 +10,11 @@ function hexToRgba(hex: number, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`
 }
 
-/** 红色指针固定朝上, 表盘随镜头旋转 */
+const WL = 0.15
+const centerX = (WL + DIMENSIONS.houseWidth + WL) / 2
+const centerZ = ZONE_OFFSETS.totalLength / 2
+
+/** 红色指针固定朝上, 表盘随镜头位置旋转(与建筑方向一致) */
 export default function Compass({ camera }: CompassProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -20,7 +24,6 @@ export default function Compass({ camera }: CompassProps) {
     const size = 100
     canvas.width = size * 2; canvas.height = size * 2
     const cx = size, cy = size, r = size - 10
-    const camDir = new THREE.Vector3()
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -28,9 +31,8 @@ export default function Compass({ camera }: CompassProps) {
       ctx.fillStyle = hexToRgba(COLORS.compassBg, 0.85); ctx.fill()
       ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2; ctx.stroke()
 
-      camera.getWorldDirection(camDir)
-      // Math.abs 修正 OrbitControls 绕侧时 camDir.z 变负号问题
-      const camAngle = Math.atan2(camDir.x, Math.abs(camDir.z) || 0.001)
+      // 相机位置相对建筑中心的方位角 → 镜头朝向 = 方位角 + π
+      const camAngle = Math.atan2(camera.position.x - centerX, camera.position.z - centerZ) + Math.PI
 
       const dirs: [string, number][] = [['N', -Math.PI/4], ['E', Math.PI/4], ['S', 3*Math.PI/4], ['W', -3*Math.PI/4]]
       ctx.fillStyle = hexToCss(COLORS.labelText)
