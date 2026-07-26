@@ -1,18 +1,17 @@
 import * as THREE from 'three'
 import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
+import { aisleX, frontZ, centerX } from '../utils/screen'
 
 const DIM_COLOR = 0xffd700
 const WL = 0.15
-const HW = DIMENSIONS.houseWidth
-const totalX = WL + HW + WL
+const totalX = WL + DIMENSIONS.houseWidth + WL
 const totalZ = ZONE_OFFSETS.totalLength
 const eaveH = DIMENSIONS.roof.eaveHeight
 const ridgeH = DIMENSIONS.roof.ridgeHeight
 
-// 标注位置 — 屏幕左=世界右侧(>cameraX≈1.43)=过道侧
 const DIM_OFFSET = 0.08
-const DIM_X = totalX + DIM_OFFSET
-const DIM_LABEL_X = totalX + DIM_OFFSET + 0.15
+const DIM_X = aisleX(DIM_OFFSET)
+const DIM_LABEL_X = aisleX(DIM_OFFSET + 0.15)
 
 function dimLine(points: THREE.Vector3[]): THREE.Line {
   const geo = new THREE.BufferGeometry().setFromPoints(points)
@@ -39,8 +38,9 @@ export function createDimensions(): THREE.Group {
   group.add(dimLine([new THREE.Vector3(DIM_X, 0.02, 0), new THREE.Vector3(DIM_X, 0.02, totalZ)]))
   group.add(dimText(`${totalZ.toFixed(2)}m`, new THREE.Vector3(DIM_LABEL_X, 0.15, totalZ / 2)))
 
-  group.add(dimLine([new THREE.Vector3(0, 0.02, -DIM_OFFSET), new THREE.Vector3(totalX, 0.02, -DIM_OFFSET)]))
-  group.add(dimText(`${totalX.toFixed(2)}m`, new THREE.Vector3(totalX / 2, 0.15, -DIM_OFFSET - 0.15)))
+  const frontZOff = frontZ(DIM_OFFSET)
+  group.add(dimLine([new THREE.Vector3(0, 0.02, frontZOff), new THREE.Vector3(totalX, 0.02, frontZOff)]))
+  group.add(dimText(`${totalX.toFixed(2)}m`, new THREE.Vector3(centerX(), 0.15, frontZ(DIM_OFFSET + 0.15))))
 
   const zA = ZONE_OFFSETS.zoneAStart, zB = ZONE_OFFSETS.zoneBStart, zC = ZONE_OFFSETS.zoneCStart
   const lA = DIMENSIONS.zoneA.length, lB = DIMENSIONS.zoneB.length, lC = DIMENSIONS.zoneC.length
