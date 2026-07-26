@@ -24,9 +24,17 @@ src/
 └── utils/webgl.ts     # WebGL 可用性检测
 ```
 
+## Three.js 注意
+
+- `Matrix4.lookAt(eye, target, up)` 中 `x = cross(up, normalize(eye - target))`
+- **相机在 -Z 看向 +Z 时**：`eye-target ≈ -Z`，`cross(up, -Z) = -X`，导致**屏幕右 = 世界 -X**，左右颠倒
+- 标准用法（相机在 +Z 看向原点）屏幕右 = 世界 +X，无此问题
+- 本项目相机在西南(-Z)望向东北(+Z)，故环境元素（过道/邻居）位置已按视觉正确性调整
+
 ## 关键约定
 
-- 坐标系: +Z=东北(远), -Z=西南(近), -X=西北(过道), +X=东南(邻居)
+- 世界坐标系: +Z=东北(远), -Z=西南(近), -X=西北, +X=东南
+- 视觉映射: 相机在-Z看向+Z → 屏幕左=世界+X, 屏幕右=世界-X
 - 所有材质程序生成，无外部纹理文件
 - `npm run build` = `tsc -b && vite build`
 - Tailwind 入口: `src/index.css` 中用 `@import "tailwindcss"`（无 `@tailwind` 指令）
