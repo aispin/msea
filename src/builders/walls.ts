@@ -75,23 +75,20 @@ export function createWalls(): THREE.Group {
   // 过梁
   group.add(makeWall(totalX / 2, innerDoorH + innerLintelH / 2, abWallZ, totalX, innerLintelH, WL))
 
-  // --- 室内地板 ---
-  const floorMat = new THREE.MeshStandardMaterial({
-    color: 0xc4a46c, roughness: 0.7, metalness: 0.0,
-  })
-
-  function makeFloor(zStart: number, zLen: number): THREE.Mesh {
+  // --- 室内地板 (按区域微调颜色) ---
+  function makeFloor(zStart: number, zLen: number, color: number): THREE.Mesh {
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.7, metalness: 0.0 })
     const geo = new THREE.PlaneGeometry(HW, zLen)
-    const mesh = new THREE.Mesh(geo, floorMat)
+    const mesh = new THREE.Mesh(geo, mat)
     mesh.rotation.x = -Math.PI / 2
     mesh.position.set(totalX / 2, 0.02, zStart + zLen / 2)
     mesh.receiveShadow = true
     return mesh
   }
 
-  group.add(makeFloor(zA, lA))                          // A区地板
-  group.add(makeFloor(zAB, lB))                         // B区地板
-  group.add(makeFloor(zC, lC))                          // C区地板
+  group.add(makeFloor(zA, lA, 0xd5cec5))  // A区暖灰
+  group.add(makeFloor(zAB, lB, 0xe0d8c8)) // B区浅米
+  group.add(makeFloor(zC, lC, 0xe8dfd0))  // C区暖黄
 
   return group
 }

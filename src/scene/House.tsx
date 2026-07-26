@@ -7,6 +7,7 @@ import { createAllWindows } from '../builders/windows'
 import { createAttic } from '../builders/attic'
 import { createEnvironment } from '../builders/environment'
 import { createLabels } from '../builders/labels'
+import { createDimensions } from '../builders/dimensions'
 
 interface HouseProps {
   scene: THREE.Scene
@@ -14,6 +15,7 @@ interface HouseProps {
 
 export default function House({ scene }: HouseProps) {
   const houseGroup = useRef<THREE.Group | null>(null)
+  const dimGroup = useRef<THREE.Group | null>(null)
 
   useEffect(() => {
     const group = new THREE.Group()
@@ -25,6 +27,13 @@ export default function House({ scene }: HouseProps) {
     group.add(createAttic())
     group.add(createEnvironment())
     group.add(createLabels())
+
+    // 尺寸标注 — 默认隐藏, D键切换
+    const dims = createDimensions()
+    dims.visible = false
+    dims.userData.isDimGroup = true
+    group.add(dims)
+    dimGroup.current = dims
 
     scene.add(group)
     houseGroup.current = group

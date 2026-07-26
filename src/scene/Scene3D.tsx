@@ -242,8 +242,17 @@ export default function Scene3D({ onCameraReady }: Props) {
 
     setScene(threeScene)
 
+    // D键切换尺寸标注
+    function onKeyD(e: KeyboardEvent) {
+      if (e.code === 'KeyD' && !firstPerson.isActive) {
+        threeScene.traverse(c => { if (c.userData.isDimGroup) c.visible = !c.visible })
+      }
+    }
+    window.addEventListener('keydown', onKeyD)
+
     return () => {
       cancelAnimationFrame(animId)
+      window.removeEventListener('keydown', onKeyD)
       window.removeEventListener('resize', onResize)
       renderer.domElement.removeEventListener('click', onCanvasClick)
       firstPerson.disable()
