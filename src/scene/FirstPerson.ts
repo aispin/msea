@@ -124,3 +124,30 @@ export class FirstPerson {
     }
   }
 }
+
+// 从建筑尺寸生成碰撞盒（门洞区域不阻挡）
+import { DIMENSIONS, ZONE_OFFSETS } from '../config/house'
+
+export function buildHouseCollisionBoxes(): CollisionBox[] {
+  const WL = 0.15
+  const HW = DIMENSIONS.houseWidth
+  const totalX = WL + HW + WL
+  const zEnd = ZONE_OFFSETS.totalLength
+  const zAB = ZONE_OFFSETS.zoneBStart  // A-B墙NE面
+
+  const boxes: CollisionBox[] = [
+    // SW外墙 (正面)
+    { min: new THREE.Vector3(0, 0, 0), max: new THREE.Vector3(totalX, 5, WL) },
+    // NW外墙 (过道侧)
+    { min: new THREE.Vector3(0, 0, 0), max: new THREE.Vector3(WL, 5, zEnd) },
+    // SE外墙 (邻居侧)
+    { min: new THREE.Vector3(totalX - WL, 0, 0), max: new THREE.Vector3(totalX, 5, zEnd) },
+    // NE外墙 (背面)
+    { min: new THREE.Vector3(0, 0, zEnd - WL), max: new THREE.Vector3(totalX, 5, zEnd) },
+    // A-B承重墙 (z=zAB_SW ~ zAB, 门洞1.0m在中间)
+    { min: new THREE.Vector3(0, 0, zAB - WL), max: new THREE.Vector3(totalX / 2 - 0.5, 5, zAB) },
+    { min: new THREE.Vector3(totalX / 2 + 0.5, 0, zAB - WL), max: new THREE.Vector3(totalX, 5, zAB) },
+  ]
+
+  return boxes
+}
