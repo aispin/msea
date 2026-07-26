@@ -40,7 +40,7 @@ export function createEnvironment(): THREE.Group {
   const neighbor = new THREE.Mesh(neighborGeo, neighborMat)
   const gap = DIMENSIONS.neighbor.gap
   neighbor.position.set(
-    HW + aisleW + gap + neighborW / 2,
+    HW + gap + neighborW / 2,
     neighborH / 2,
     totalLen / 2
   )
