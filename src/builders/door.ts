@@ -47,18 +47,21 @@ export function createDoor(): THREE.Group {
   rightFrame.position.set(doorCenterX + doorW / 2 + frameThick / 2, doorH / 2, doorT / 2)
   group.add(rightFrame)
 
-  // 门环 (简化 — 半球装饰)
-  const ringGeo = new THREE.TorusGeometry(0.04, 0.012, 8, 8)
-  const ringBaseGeo = new THREE.CylinderGeometry(0.02, 0.025, 0.03, 8)
+  // 门环 — 紧贴门板表面，环平行于门面(XY平面)
+  const ringGeo = new THREE.TorusGeometry(0.035, 0.01, 8, 8)
+  const ringBaseGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.01, 8)
   for (const side of [-1, 1]) {
     const ringX = doorCenterX + side * halfW * 0.55
     const ringY = doorH * 0.55
-    const ringZ = doorT / 2 + 0.01
+    const ringZ = doorT / 2 + 0.003  // 紧贴门板
+    // 环 — XY平面，从正面可见圆形
     const ring = new THREE.Mesh(ringGeo, ringMat)
     ring.position.set(ringX, ringY, ringZ)
     group.add(ring)
+    // 底座 — 平贴门板
     const base = new THREE.Mesh(ringBaseGeo, ringMat)
-    base.position.set(ringX, ringY - 0.04, ringZ)
+    base.rotation.x = Math.PI / 2  // 圆柱端面朝+Z, 平贴门面
+    base.position.set(ringX, ringY - 0.035, ringZ)
     group.add(base)
   }
 
