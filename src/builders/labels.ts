@@ -54,13 +54,19 @@ export function createLabels(): THREE.Group {
   group.add(labelC)
 
   // 方向标识 (N/S/E/W) 地面固定
+  // 建筑轴线: +Z=NE(45°), -Z=SW(225°), -X=NW(315°), +X=SE(135°)
+  // 真实罗盘方向相对建筑轴线旋转 45°
   const margin = 4.0
   const dirY = 0.05
+  const cx = HW / 2
+  const cz = totalLen / 2
+  const dist = Math.max(totalLen, HW) / 2 + margin
+  const cos45 = Math.SQRT1_2 // ≈0.707
   const dirData: [string, number, number][] = [
-    ['N', HW / 2, totalLen + margin],
-    ['S', HW / 2, -margin],
-    ['E', HW + margin, totalLen / 2],
-    ['W', -margin, totalLen / 2],
+    ['N', cx - dist * cos45, cz + dist * cos45],
+    ['S', cx + dist * cos45, cz - dist * cos45],
+    ['E', cx + dist * cos45, cz + dist * cos45],
+    ['W', cx - dist * cos45, cz - dist * cos45],
   ]
   for (const [text, x, z] of dirData) {
     const sprite = createTextSprite(text, 56, 0x1a1a2e)

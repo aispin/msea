@@ -45,16 +45,17 @@ export default function Compass({ camera }: CompassProps) {
       ctx.lineWidth = 2
       ctx.stroke()
 
-      // 计算相机方向 (XZ平面投影, +Z=0, +X=PI/2)
+      // 计算相机方向 (XZ平面投影)
+      // 建筑坐标系: +Z=NE(45°), 真实N在-Z与+X之间即-π/4
       camera.getWorldDirection(camDir)
       const camAngle = Math.atan2(camDir.x, camDir.z)
 
-      // 方向标记 N/E/S/W
+      // 方向标记 N/E/S/W (真实罗盘方向)
       const dirs = [
-        { label: 'N', angle: 0 },
-        { label: 'E', angle: Math.PI / 2 },
-        { label: 'S', angle: Math.PI },
-        { label: 'W', angle: -Math.PI / 2 },
+        { label: 'N', angle: -Math.PI / 4 },
+        { label: 'E', angle: Math.PI / 4 },
+        { label: 'S', angle: 3 * Math.PI / 4 },
+        { label: 'W', angle: -3 * Math.PI / 4 },
       ]
       ctx.fillStyle = hexToCss(COLORS.labelText)
       ctx.font = 'bold 13px sans-serif'
@@ -69,8 +70,8 @@ export default function Compass({ camera }: CompassProps) {
         ctx.fillText(label, dx, dy)
       }
 
-      // 指针 (红色三角形指向北, 灰色指向南)
-      const needleAngle = -camAngle
+      // 指针 (红色指向北, 灰色指向南) — 北在建筑坐标-π/4
+      const needleAngle = -camAngle - Math.PI / 4
 
       ctx.save()
       ctx.translate(cx, cy)
