@@ -1,10 +1,19 @@
 import * as THREE from 'three'
-import { DIMENSIONS } from '../config/house'
+import { DIMENSIONS, COLORS } from '../config/house'
 import { createWoodMaterial } from '../materials'
 
 export function createDoor(): THREE.Group {
   const group = new THREE.Group()
   const woodMat = createWoodMaterial()
+  // 门锁：MeshStandardMaterial + polygonOffset 确保精确贴在门面上
+  const lockMat = new THREE.MeshStandardMaterial({
+    color: COLORS.doorRing,
+    roughness: 0.3,
+    metalness: 0.9,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+    polygonOffsetUnits: -1,
+  })
 
   const doorW = DIMENSIONS.door.width    // 1.0m total
   const doorH = DIMENSIONS.door.height    // 2.1m
@@ -46,19 +55,23 @@ export function createDoor(): THREE.Group {
   rightFrame.position.set(doorCenterX + doorW / 2 + frameThick / 2, doorH / 2, doorT / 2)
   group.add(rightFrame)
 
-  // 门把手 — 当墙体实体处理，尺寸放大到建筑尺度，与门外框材质一致
-  const pullW = 0.08   // 宽8cm
-  const pullH = 0.15   // 高15cm
-  const pullD = 0.04   // 厚4cm(突出门外)
-  const pullGeo = new THREE.BoxGeometry(pullW, pullH, pullD)
+  // 门锁 — 圆形底座+环，直接在世界坐标，与门扇同级
+  const baseGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.006, 16)
+  const ringGeo = new THREE.TorusGeometry(0.018, 0.005, 8, 12)
+
   for (const side of [-1, 1]) {
-    const px = doorCenterX + side * halfW * 0.55
-    const py = doorH * 0.55
-    const pz = doorT / 2 + pullD / 2  // 一半厚度在门外
-    const pull = new THREE.Mesh(pullGeo, woodMat)  // 用门框木材材质，与墙体同为MeshStandardMaterial
-    pull.position.set(px, py, pz)
-    pull.castShadow = true
-    group.add(pull)  // 直接加入门group，与门扇平级，都是建筑实体
+    const lx = doorCenterX + side * halfW * 0.55
+    const ly = doorH * 0.55
+    const lz = doorT / 2
+
+    const base = new THREE.Mesh(baseGeo, lockMat)
+    base.rotation.x = Math.PI / 2
+    base.position.set(lx, ly, lz)
+    group.add(base)
+
+    const ring = new THREE.Mesh(ringGeo, lockMat)
+    ring.position.set(lx, ly - 0.025, lz)
+    group.add(ring)
   }
 
   // 门放置在 SW墙 z=0 处
