@@ -32,6 +32,18 @@ src/
 - Tailwind 入口: `src/index.css` 中用 `@import "tailwindcss"`
 - OrbitControls 桌面 + 移动端触摸
 
+## 常见陷阱：屏幕方向与 3D 坐标不一致
+
+Three.js `lookAt`（相机在 -Z 望 +Z）导致：`x = cross(up, eye-target) ≈ -X`。**屏幕右 = 世界 -X，屏幕左 = 世界 +X**。
+
+快速参考（相机 X≈1.43）：
+- **屏幕左**（过道侧）：世界 X > 1.43（如 totalX+0.08=2.94）
+- **屏幕右**（邻居侧）：世界 X < 1.43（如 -0.08）
+- **屏幕下**（近/门前）：世界 Z < 4.45
+- **屏幕上**（远/屋后）：世界 Z > 4.45
+
+任何标注、标签、UI 元素需要放置到"过道侧"→ 用 `totalX + offset`，"邻居侧"→ 用 `-offset`。
+
 ## 技术文档
 
 几何细节、坐标系、旋转映射、屋顶结构等见 **[docs/tech.md](docs/tech.md)**。
