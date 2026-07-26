@@ -5,17 +5,19 @@ import { LIGHTING, CAMERA, DIMENSIONS } from '../config/house'
 import House from './House'
 import { FirstPerson, buildHouseCollisionBoxes } from './FirstPerson'
 import MobileControls from '../ui/MobileControls'
+import Compass from '../ui/Compass'
 
 const COLLISION_RADIUS = 0.2
 
 interface Props {
-  onCameraReady: (camera: THREE.PerspectiveCamera) => void
+  onCameraReady?: (camera: THREE.PerspectiveCamera) => void
 }
 
 export default function Scene3D({ onCameraReady }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [scene, setScene] = useState<THREE.Scene | null>(null)
   const [tourMode, setTourMode] = useState(false)
+  const [cam, setCam] = useState<THREE.PerspectiveCamera | null>(null)
 
   const fpRef = useRef<FirstPerson | null>(null)
   const controlsRef = useRef<OrbitControls | null>(null)
