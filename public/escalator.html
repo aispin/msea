@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>山海里 - 平面+立面图</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            background: #f5f0eb;
+            font-family: "Microsoft YaHei", sans-serif;
+            padding: 12px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            padding: 16px 24px 20px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            flex-shrink: 0;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .sub {
+            color: #7f8c8d;
+            font-size: 14px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .canvas-row {
+            display: flex;
+            flex: 1;
+            gap: 20px;
+            min-height: 0;
+        }
+        .canvas-wrapper {
+            flex: 1;
+            background: #faf8f6;
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid #e0d6cc;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        .canvas-wrapper canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: #ffffff;
+            border-radius: 4px;
+        }
+        .canvas-title {
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            padding: 4px 0 2px 0;
+            flex-shrink: 0;
+        }
+        .footer {
+            flex-shrink: 0;
+            margin-top: 10px;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            font-size: 13px;
+            color: #2c3e50;
+            padding-top: 10px;
+            border-top: 1px solid #e0d6cc;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 24px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid #b0a89c;
+        }
+        .legend-color.door { background: #8b5a3a; }
+        .legend-color.window { background: #88ccff; border-color: #4a8db7; }
+        .legend-color.inner-door { background: #ffaa33; border-color: #cc8800; }
+        .legend-color.roof { background: #6b4a2e; opacity: 0.4; }
+        .note {
+            font-size: 12px;
+            color: #7f8c8d;
+            background: #f8f5f2;
+            padding: 6px 14px;
+            border-radius: 8px;
+            border-left: 4px solid #b87c5a;
+            margin-top: 6px;
+        }
+        .note strong { color: #2c3e50; }
+        @media (max-width: 800px) {
+            .canvas-row { flex-direction: column; }
+            .container { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏠 山海里 · 结构尺寸图</h1>
+        <div class="sub">A区（入户） · B区（会客） · C区（音乐/阁楼）</div>
+    </div>
+
+    <div class="canvas-row">
+        <div class="canvas-wrapper">
+            <canvas id="planCanvas"></canvas>
+            <div class="canvas-title">平面图（俯视）</div>
+        </div>
+        <div class="canvas-wrapper">
+            <canvas id="elevCanvas"></canvas>
+            <div class="canvas-title">立面图（过道侧看）</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="legend">
+            <span class="legend-item"><span class="legend-color" style="background:#b87c5a;"></span> A区</span>
+            <span class="legend-item"><span class="legend-color" style="background:#d4a373;"></span> B区</span>
+            <span class="legend-item"><span class="legend-color" style="background:#b5835a;"></span> C区</span>
+            <span class="legend-item"><span class="legend-color door;"></span> 外门 (0.88×2.0m)</span>
+            <span class="legend-item"><span class="legend-color inner-door;"></span> 内门框 (1.06×2.58m)</span>
+            <span class="legend-item"><span class="legend-color window;"></span> 窗户 (位置示意)</span>
+            <span class="legend-item"><span class="legend-color roof;"></span> 屋顶覆盖B+C区</span>
+            <span class="legend-item" style="margin-left:auto;">↗ 屏幕方向: 左N · 下W · 右E · 上S</span>
+        </div>
+        <div class="note">
+            <strong>尺寸说明：</strong> 总宽 2.56m · 总进深 8.45m (A:2.90 + B:3.00 + C:2.55) · 屋脊高 5.00m · 檐口高 3.15m · 阁楼底板高 2.15m
+        </div>
+    </div>
+</div>
+
+<script>
+    // ====== 平面图绘制 ======
+    function drawPlan(canvas) {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const pad = 24;
+        const w = rect.width - pad * 2;
+        const h = rect.height - pad * 2;
+        canvas.width = w * devicePixelRatio;
+        canvas.height = h * devicePixelRatio;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        const ctx = canvas.getContext('2d');
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+
+        ctx.clearRect(0, 0, w, h);
+
+        const A = { w: 2.56, d: 2.90, h: 3.15 };
+        const B = { w: 2.56, d: 3.00, hEave: 3.15, hRidge: 5.00 };
+        const C = { w: 2.56, d: 2.55, h: 3.15, loftH: 2.15 };
+        const totalDepth = A.d + B.d + C.d;
+        const totalWidth = A.w;
+
+        const scaleX = (w - 60) / totalWidth;
+        const scaleY = (h - 60) / totalDepth;
+        const scale = Math.min(scaleX, scaleY, 55);
+
+        const originX = (w - totalWidth * scale) / 2;
+        const originY = (h - totalDepth * scale) / 2 + totalDepth * scale;
+
+        function toPixel(mx, mz) {
+            return { x: originX + mx * scale, y: originY - mz * scale };
+        }
+
+        function drawRect(mx, mz, wd, d, fillColor, strokeColor='#3a2a1a', lineWidth=1.5, label='', labelColor='#2c3e50') {
+            const p = toPixel(mx, mz);
+            const p2 = toPixel(mx + wd, mz + d);
+            const x = p.x, y = p.y;
+            const width = p2.x - p.x;
+            const height = p2.y - p.y;
+            ctx.save();
+            ctx.fillStyle = fillColor;
+            ctx.globalAlpha = 0.6;
+            ctx.fillRect(x, y, width, height);
+            ctx.globalAlpha = 1.0;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = lineWidth;
+            ctx.strokeRect(x, y, width, height);
+            ctx.restore();
+            if (label) {
+                ctx.save();
+                ctx.fillStyle = labelColor;
+                ctx.font = `bold ${Math.min(16, scale*0.6)}px "Microsoft YaHei"`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(label, x + width/2, y + height/2);
+                ctx.restore();
+            }
+        }
+
+        function drawDimension(mx1, mz1, mx2, mz2, label, offset=20, color='#2c3e50') {
+            const p1 = toPixel(mx1, mz1);
+            const p2 = toPixel(mx2, mz2);
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.2;
+            ctx.setLineDash([4, 4]);
+            ctx.font = `${Math.min(13, scale*0.5)}px "Microsoft YaHei"`;
+            ctx.fillStyle = color;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            if (Math.abs(mx2 - mx1) > 0.01) {
+                const y = Math.min(p1.y, p2.y) - offset;
+                const x1 = p1.x, x2 = p2.x;
+                ctx.beginPath();
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x2, y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                ctx.moveTo(x1, y);
+                ctx.lineTo(x1+6, y-4);
+                ctx.lineTo(x1+6, y+4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(x2, y);
+                ctx.lineTo(x2-6, y-4);
+                ctx.lineTo(x2-6, y+4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = color;
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(label, (x1+x2)/2, y-6);
+            } else {
+                const x = Math.min(p1.x, p2.x) - offset;
+                const y1 = p1.y, y2 = p2.y;
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x, y2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                ctx.lineTo(x-4, y1+6);
+                ctx.lineTo(x+4, y1+6);
+                ctx.closePath();
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(x, y2);
+                ctx.lineTo(x-4, y2-6);
+                ctx.lineTo(x+4, y2-6);
+                ctx.closePath();
+                ctx.fill();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = color;
+                ctx.save();
+                ctx.translate(x-18, (y1+y2)/2);
+                ctx.rotate(-Math.PI/2);
+                ctx.fillText(label, 0, 0);
+                ctx.restore();
+            }
+            ctx.restore();
+        }
+
+        function drawDoor(mx, mz, width, height) {
+            const p = toPixel(mx, mz);
+            const x = p.x, y = p.y;
+            const w = width * scale;
+            const h = height * scale;
+            const radius = Math.min(w, h) * 0.5;
+            ctx.save();
+            ctx.strokeStyle = '#4a2e1a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x, y - radius, radius, 0, Math.PI/2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, y - radius*1.2);
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + radius*1.2, y);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawWindow(mx, mz, wd, ht) {
+            const p = toPixel(mx, mz);
+            const x = p.x, y = p.y;
+            ctx.save();
+            ctx.fillStyle = '#88ccff';
+            ctx.globalAlpha = 0.5;
+            ctx.fillRect(x, y - ht*scale, wd*scale, ht*scale);
+            ctx.globalAlpha = 1.0;
+            ctx.strokeStyle = '#4a8db7';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x, y - ht*scale, wd*scale, ht*scale);
+            ctx.beginPath();
+            ctx.moveTo(x + wd*scale/2, y - ht*scale);
+            ctx.lineTo(x + wd*scale/2, y);
+            ctx.moveTo(x, y - ht*scale/2);
+            ctx.lineTo(x + wd*scale, y - ht*scale/2);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // 绘制
+        drawRect(0, 0, A.w, A.d, '#b87c5a', '#3a2a1a', 2, 'A区');
+        drawRect(0, A.d, B.w, B.d, '#d4a373', '#3a2a1a', 2, 'B区');
+        drawRect(0, A.d + B.d, C.w, C.d, '#b5835a', '#3a2a1a', 2, 'C区');
+
+        ctx.save();
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = '#6b4a2e';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.5;
+        const roofTop = toPixel(0, A.d);
+        ctx.strokeRect(roofTop.x, roofTop.y, B.w*scale, (B.d+C.d)*scale);
+        ctx.globalAlpha = 1.0;
+        ctx.restore();
+        ctx.save();
+        ctx.fillStyle = '#6b4a2e';
+        ctx.font = `${Math.min(13, scale*0.5)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        const roofLabelPos = toPixel(B.w/2, A.d + (B.d+C.d)/2);
+        ctx.fillText('屋顶覆盖B+C区', roofLabelPos.x, roofLabelPos.y + 20);
+        ctx.restore();
+
+        drawDoor(A.w/2 - 0.44, 0, 0.88, 2.0);
+        ctx.save();
+        ctx.fillStyle = '#3a2518';
+        ctx.font = `${Math.min(12, scale*0.45)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        const doorPos = toPixel(A.w/2, 0);
+        ctx.fillText('外门 0.88×2.0m', doorPos.x, doorPos.y + 6);
+        ctx.restore();
+
+        drawDoor(A.w/2 - 0.53, A.d, 1.06, 2.58);
+        ctx.save();
+        ctx.fillStyle = '#cc8800';
+        ctx.font = `${Math.min(12, scale*0.45)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        const innerPos = toPixel(A.w/2, A.d);
+        ctx.fillText('内门框 1.06×2.58m', innerPos.x, innerPos.y - 6);
+        ctx.restore();
+
+        const winW = 0.6, winH = 0.8;
+        drawWindow(0, A.d + B.d/2 - 0.3, winW, winH);
+        drawWindow(0, A.d + B.d + C.d/2 - 0.3, winW, winH);
+        drawWindow(C.w/2 - 0.3, A.d + B.d + C.d, winW, winH);
+
+        drawDimension(0, totalDepth, A.w, totalDepth, '总宽 2.56m', 30);
+        drawDimension(0, 0, 0, A.d, 'A 2.90m', 30);
+        drawDimension(0, A.d, 0, A.d+B.d, 'B 3.00m', 30);
+        drawDimension(0, A.d+B.d, 0, A.d+B.d+C.d, 'C 2.55m', 30);
+        drawDimension(A.w, 0, A.w, totalDepth, '总进深 8.45m', 30);
+
+        function drawDir(text, mx, mz, color='#2c3e50') {
+            const p = toPixel(mx, mz);
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.font = `bold ${Math.min(20, scale*0.7)}px "Microsoft YaHei"`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, p.x, p.y);
+            ctx.restore();
+        }
+        drawDir('N', -0.6, totalDepth + 0.5);
+        drawDir('W', -0.6, -0.5);
+        drawDir('E', A.w + 0.6, totalDepth + 0.5);
+        drawDir('S', A.w + 0.6, -0.5);
+    }
+
+    // ====== 立面图绘制（标注区域名称和尺寸）=====
+    function drawElevation(canvas) {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const pad = 24;
+        const w = rect.width - pad * 2;
+        const h = rect.height - pad * 2;
+        canvas.width = w * devicePixelRatio;
+        canvas.height = h * devicePixelRatio;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        const ctx = canvas.getContext('2d');
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+        ctx.clearRect(0, 0, w, h);
+
+        // 尺寸数据
+        const A = { w: 2.56, d: 2.90, h: 3.15 };
+        const B = { w: 2.56, d: 3.00, hEave: 3.15, hRidge: 5.00 };
+        const C = { w: 2.56, d: 2.55, h: 3.15, loftH: 2.15 };
+        const totalDepth = A.d + B.d + C.d;
+        const totalWidth = A.w;
+
+        // 计算缩放
+        const maxHeight = 5.5;
+        const scaleX = (w - 60) / totalWidth;
+        const scaleY = (h - 80) / maxHeight; // 留出标题空间
+        const scale = Math.min(scaleX, scaleY);
+
+        const originX = (w - totalWidth * scale) / 2;
+        const originY = h - 20;
+
+        // ---- 地面线 ----
+        ctx.save();
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(originX - 20, originY);
+        ctx.lineTo(originX + totalWidth * scale + 20, originY);
+        ctx.stroke();
+        ctx.restore();
+
+        // 重新排序：C左，B中，A右
+        const cStartX = originX;
+        const cW = totalWidth * scale * (C.d / totalDepth);
+        const cH = C.h * scale;
+        const bStartX = originX + totalWidth * scale * (C.d / totalDepth);
+        const bW = totalWidth * scale * (B.d / totalDepth);
+        const bH = B.hEave * scale;
+        const aStartX = originX + totalWidth * scale * ((C.d + B.d) / totalDepth);
+        const aW = totalWidth * scale * (A.d / totalDepth);
+        const aH = A.h * scale;
+
+        // ---- 绘制C区 ----
+        ctx.fillStyle = '#b5835a';
+        ctx.globalAlpha = 0.6;
+        ctx.fillRect(cStartX, originY - cH, cW, cH);
+        ctx.globalAlpha = 1.0;
+        ctx.strokeStyle = '#3a2a1a';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(cStartX, originY - cH, cW, cH);
+        // 区域名称
+        ctx.save();
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = `bold ${Math.min(16, scale*0.6)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('C区', cStartX + cW/2, originY - cH/2);
+        ctx.restore();
+        // 宽尺寸
+        ctx.save();
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = `${Math.min(12, scale*0.45)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('2.55m', cStartX + cW/2, originY - cH - 4);
+        ctx.restore();
+
+        // ---- 绘制B区 ----
+        ctx.fillStyle = '#d4a373';
+        ctx.globalAlpha = 0.6;
+        ctx.fillRect(bStartX, originY - bH, bW, bH);
+        ctx.globalAlpha = 1.0;
+        ctx.strokeStyle = '#3a2a1a';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(bStartX, originY - bH, bW, bH);
+        ctx.save();
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = `bold ${Math.min(16, scale*0.6)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('B区', bStartX + bW/2, originY - bH/2);
+        ctx.restore();
+        // 宽
+        ctx.save();
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = `${Math.min(12, scale*0.45)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('3.00m', bStartX + bW/2, originY - bH - 4);
+        ctx.restore();
+
+        // ---- 屋顶三角形（覆盖C+B） ----
+        const roofStartX = originX;
+        const roofEndX = originX + totalWidth * scale * ((C.d + B.d) / totalDepth);
+        const roofWidth = roofEndX - roofStartX;
+        const roofHeight = (B.hRidge - B.hEave) * scale;
+        const roofTopY = originY - bH - roofHeight;
+        ctx.save();
+        ctx.fillStyle = '#6b4a2e';
+        ctx.globalAlpha = 0.4;
+        ctx.beginPath();
+        ctx.moveTo(roofStartX, originY - bH);
+        ctx.lineTo(roofStartX + roofWidth/2, roofTopY);
+        ctx.lineTo(roofEndX, originY - bH);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+        ctx.strokeStyle = '#4a2e1a';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+
+        // 屋脊高度标注
+        ctx.save();
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = `${Math.min(12, scale*0.45)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText('屋脊 5.00m', bStartX + bW/2, roofTopY + 4);
+        ctx.restore();
+
+        // ---- 绘制A区 ----
+        ctx.fillStyle = '#b87c5a';
+        ctx.globalAlpha = 0.6;
+        ctx.fillRect(aStartX, originY - aH, aW, aH);
+        ctx.globalAlpha = 1.0;
+        ctx.strokeStyle = '#3a2a1a';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(aStartX, originY - aH, aW, aH);
+        ctx.save();
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = `bold ${Math.min(16, scale*0.6)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('A区', aStartX + aW/2, originY - aH/2);
+        ctx.restore();
+        ctx.save();
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = `${Math.min(12, scale*0.45)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('2.90m', aStartX + aW/2, originY - aH - 4);
+        ctx.restore();
+
+        // ---- 阁楼底板标注（在C区内部） ----
+        const loftY = originY - (C.loftH * scale);
+        ctx.save();
+        // ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = '#cc8800';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(cStartX, loftY);
+        ctx.lineTo(cStartX + cW, loftY);
+        ctx.stroke();
+        ctx.restore();
+        ctx.save();
+        ctx.fillStyle = '#cc8800';
+        ctx.font = `${Math.min(11, scale*0.4)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('阁楼高 2.15m', cStartX + 4, loftY - 2);
+        ctx.restore();
+
+        // ---- 添加整体高度尺寸线（右侧） ----
+        const dimX = originX + totalWidth * scale + 30;
+        const groundY = originY;
+        const topY = roofTopY;
+        ctx.save();
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(dimX, groundY);
+        ctx.lineTo(dimX, topY);
+        ctx.stroke();
+        // 箭头
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(dimX, groundY);
+        ctx.lineTo(dimX-5, groundY-8);
+        ctx.lineTo(dimX+5, groundY-8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(dimX, topY);
+        ctx.lineTo(dimX-5, topY+8);
+        ctx.lineTo(dimX+5, topY+8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = `${Math.min(12, scale*0.45)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('总高 5.00m', dimX, (groundY + topY)/2 + 4);
+        ctx.restore();
+
+        // ---- 添加檐口高度尺寸线（右侧偏下） ----
+        const eaveY = originY - bH;
+        const dimX2 = originX + totalWidth * scale + 50;
+        ctx.save();
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(dimX2, groundY);
+        ctx.lineTo(dimX2, eaveY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(dimX2, groundY);
+        ctx.lineTo(dimX2-5, groundY-8);
+        ctx.lineTo(dimX2+5, groundY-8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(dimX2, eaveY);
+        ctx.lineTo(dimX2-5, eaveY+8);
+        ctx.lineTo(dimX2+5, eaveY+8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#2c3e50';
+        ctx.font = `${Math.min(12, scale*0.45)}px "Microsoft YaHei"`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('檐口高 3.15m', dimX2, (groundY + eaveY)/2 + 4);
+        ctx.restore();
+    }
+
+    // 初始化绘制
+    function initDraw() {
+        const planCanvas = document.getElementById('planCanvas');
+        const elevCanvas = document.getElementById('elevCanvas');
+        drawPlan(planCanvas);
+        drawElevation(elevCanvas);
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(initDraw, 100);
+    });
+
+    initDraw();
+</script>
+</body>
+</html>
