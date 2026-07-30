@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>完整平面图 - 扶梯紧贴东南墙</title>
+    <title>完整平面图 - 扶梯与洞口投影重叠</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -50,7 +50,7 @@
 <body>
 <div class="container">
     <h1>📐 老房改造 · 扶梯</h1>
-    <div class="sub">橙色=扶梯本体 · 绿色虚线=洞口投影 · 扶梯右侧边缘与东南墙完全重合</div>
+    <div class="sub">橙色=扶梯本体 · 绿色虚线=洞口投影 · 最里面投影完全重叠</div>
 
     <div class="canvas-wrapper">
         <canvas id="fullPlan" width="1200" height="800"></canvas>
@@ -68,10 +68,11 @@
 
     <div class="note">
         <strong>✅ 精准距离确认：</strong>
-        <br />📍 <strong>扶梯右侧边缘</strong> 紧贴 <strong>东南墙</strong>，距离 = <strong>0.00m</strong>（完全贴合）。
-        <br />📍 <strong>扶梯底部距西南边缘（B-C隔墙）</strong> = <strong>0.30m</strong>（完全在室内）。
-        <br />📍 <strong>扶梯底部距东北墙（最里面墙）</strong> = <strong>2.25m</strong>。
-        <br />🕳️ <strong>洞口净尺寸：0.7m × 0.7m</strong>（绿色虚线框），位于阁楼楼板右侧边缘。
+        <br />📍 <strong>扶梯右侧边缘</strong> 紧贴 <strong>东南墙</strong>。
+        <br />📍 <strong>扶梯底部（外部边缘）距西南边缘</strong> = <strong>0.30m</strong>。
+        <br />📍 <strong>扶梯外部边缘（西南侧）距东北墙</strong> = <strong>2.25m</strong>（C区总进深2.55 - 0.30 = 2.25m）。
+        <br />📍 <strong>洞口最内部边缘（东北侧）距东北墙</strong> = <strong>1.25m</strong>（与扶梯最内部边缘对齐）。
+        <br />🕳️ <strong>洞口净尺寸：0.7m × 0.7m</strong>，右侧紧贴东南墙，最里面投影与扶梯完全重叠。
     </div>
 </div>
 
@@ -87,6 +88,18 @@
         const C = { w: 2.56, d: 2.55 };
         const totalDepth = A.d + B.d + C.d;
         const totalWidth = A.w;
+
+        // 扶梯参数
+        const ladderW = 0.6;
+        const ladderD = 1.0;
+        const ladderX = C.w - ladderW; // 左侧边缘X
+        const ladderZ = A.d + B.d + 0.3; // 底部Z（外部边缘）
+
+        // 洞口参数（最里面投影与扶梯最内部对齐）
+        const hatchW = 0.7;
+        const hatchD = 0.7;
+        const hatchX = C.w - hatchW; // 左侧边缘X
+        const hatchZ = ladderZ + ladderD - hatchD; // 底部Z（确保顶部与扶梯顶部对齐）
 
         // ---- 缩放与偏移 ----
         const scale = 72;
@@ -376,17 +389,13 @@
         drawWindow(0, A.d + B.d + C.d/2 - 0.3, winW, winH);
         drawWindow(C.w/2 - 0.3, A.d + B.d + C.d, winW, winH);
 
-        // ---- ⭐ 扶梯：紧贴东南墙，右侧边缘在 X=C.w ----
-        const ladderX = C.w - 0.6; // 左侧边缘X
-        const ladderZ = A.d + B.d + 0.3;
-        drawLadder(ladderX, ladderZ, 0.6, 1.0, '紧贴东南墙 0.6×1.0m');
+        // ---- ⭐ 扶梯 ---- 
+        drawLadder(ladderX, ladderZ, ladderW, ladderD, '紧贴东南墙 0.6×1.0m');
 
-        // ---- ⭐ 洞口投影：0.7×0.7m ----
-        const hatchX = C.w - 0.7;
-        const hatchZ = A.d + B.d + 0.25;
-        drawHatchProjection(hatchX, hatchZ, 0.7, 0.7, '🟩 洞口 0.7×0.7m');
+        // ---- ⭐ 洞口投影 ---- 
+        drawHatchProjection(hatchX, hatchZ, hatchW, hatchD, '🟩 洞口 0.7×0.7m');
 
-        // ---- 标注2：距西南边缘（B-C隔墙）0.30m ----
+        // ---- 标注：距西南边缘 0.30m ----
         const southWestZ = A.d + B.d;
         const pSW1 = toPixel(ladderX, ladderZ);
         const pSW2 = toPixel(ladderX, southWestZ);
@@ -425,9 +434,9 @@
         ctx.fillText('西南边缘', pSW2.x, pSW2.y + 6);
         ctx.restore();
 
-        // ---- 标注3：距东北墙（最里面墙）2.25m ----
+        // ---- 标注：扶梯外部边缘（西南侧）距东北墙 2.25m ----
         const northWallZ = totalDepth;
-        const pN1 = toPixel(ladderX, ladderZ);
+        const pN1 = toPixel(ladderX, ladderZ); // 扶梯外部边缘（靠近西南）
         const pN2 = toPixel(ladderX, northWallZ);
         ctx.save();
         ctx.strokeStyle = '#8e44ad';
@@ -456,6 +465,39 @@
         ctx.textBaseline = 'middle';
         ctx.fillText('2.25m', pN1.x - 35, (pN1.y + pN2.y)/2);
         ctx.restore();
+
+        // ---- 标注：洞口最内部（东北侧）距东北墙 1.25m ----
+        const pH1 = toPixel(hatchX, hatchZ + hatchD);
+        const pH2 = toPixel(hatchX, northWallZ);
+        ctx.save();
+        ctx.strokeStyle = '#e67e22';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath();
+        ctx.moveTo(pH1.x + 20, pH1.y);
+        ctx.lineTo(pH1.x + 20, pH2.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(pH1.x + 20, pH1.y);
+        ctx.lineTo(pH1.x + 20 - 5, pH1.y + 8);
+        ctx.lineTo(pH1.x + 20 + 5, pH1.y + 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(pH1.x + 20, pH2.y);
+        ctx.lineTo(pH1.x + 20 - 5, pH2.y - 8);
+        ctx.lineTo(pH1.x + 20 + 5, pH2.y - 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#e67e22';
+        ctx.font = 'bold 12px "Microsoft YaHei"';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('1.25m', pH1.x + 40, (pH1.y + pH2.y)/2);
+        ctx.restore();
+
+        // 标注"东北墙"
         ctx.save();
         ctx.fillStyle = '#8e44ad';
         ctx.font = '11px "Microsoft YaHei"';
@@ -494,7 +536,7 @@
         ctx.fillStyle = 'rgba(0,0,0,0.04)';
         ctx.strokeStyle = '#e67e22';
         ctx.lineWidth = 1.5;
-        ctx.strokeRect(boxX, boxY, 200, 140);
+        ctx.strokeRect(boxX, boxY, 200, 160);
         ctx.fillStyle = '#e67e22';
         ctx.font = 'bold 13px "Microsoft YaHei"';
         ctx.textAlign = 'left';
@@ -503,11 +545,9 @@
         ctx.fillStyle = '#2c3e50';
         ctx.font = '12px "Microsoft YaHei"';
         ctx.fillText('• 扶梯紧贴东南墙', boxX + 12, boxY + 32);
-        ctx.fillText('• 距西南边缘 0.30m', boxX + 12, boxY + 72);
-        ctx.fillText('• 距东北墙 2.25m', boxX + 12, boxY + 92);
-        ctx.fillStyle = '#27ae60';
-        ctx.font = '11px "Microsoft YaHei"';
-        ctx.fillText('✅ 无外露风险', boxX + 12, boxY + 116);
+        ctx.fillText('• 扶梯外部边缘距西南边缘 0.30m', boxX + 12, boxY + 52);
+        ctx.fillText('• 扶梯外部边缘距东北墙 2.25m', boxX + 12, boxY + 72);
+        ctx.fillText('• 洞口最内部距东北墙 1.25m', boxX + 12, boxY + 92);
         ctx.restore();
     })();
 </script>
