@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>四点定位拍摄法 · 移动端优化</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: system-ui, -apple-system, "Microsoft YaHei", sans-serif;
+            touch-action: none; /* 防止浏览器手势干扰 */
+        }
+        #info {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 14px;
+            border-radius: 12px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            z-index: 20;
+            pointer-events: none;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #info h2 {
+            margin: 0;
+            font-weight: 500;
+            font-size: clamp(0.9rem, 4vw, 1.3rem);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #info h2 span {
+            font-size: 1.2em;
+        }
+        #info .hint {
+            font-size: clamp(0.7rem, 2.8vw, 0.9rem);
+            opacity: 0.85;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 4px 12px;
+            border-radius: 30px;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        /* CSS2D 标签 - 移动端加大字号 */
+        .label-cam {
+            color: #fff;
+            font-size: clamp(16px, 4.5vw, 24px);
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 0, 0, 0.95), 0 0 6px #000;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 14px;
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+        .label-cam small {
+            font-weight: normal;
+            font-size: 0.7em;
+            margin-left: 6px;
+            opacity: 0.9;
+        }
+        .label-dist {
+            color: #ffd966;
+            font-size: clamp(14px, 3.5vw, 20px);
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(0, 0, 0, 0.95);
+            background: rgba(20, 20, 20, 0.7);
+            padding: 2px 12px;
+            border-radius: 20px;
+            border: 1.5px solid #ffd966;
+            pointer-events: none;
+            backdrop-filter: blur(2px);
+        }
+        .label-title {
+            color: #fff;
+            font-size: clamp(18px, 5vw, 28px);
+            font-weight: bold;
+            text-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px 18px;
+            border-radius: 40px;
+            pointer-events: none;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        /* 针对超小屏额外调整 */
+        @media (max-width: 480px) {
+            .label-cam { font-size: 14px; padding: 2px 10px; }
+            .label-dist { font-size: 12px; padding: 2px 8px; }
+            .label-title { font-size: 16px; padding: 2px 12px; }
+            #info { padding: 6px 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h2><span>📸</span> 四点定位 · 烧烤现场</h2>
+        <div class="hint">👆 单指旋转 · 双指缩放</div>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        // ----- 导入 -----
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        // ----- 场景、相机、渲染器 -----
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.Fog(0x87CEEB, 15, 30);
+
+        // 相机 - 移动端初始视角拉近
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(6, 4.5, 7);
+        camera.lookAt(0, 0.6, 0);
+
+        // WebGL 渲染器
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 限制像素比提升性能
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        document.body.appendChild(renderer.domElement);
+
+        // CSS2D 渲染器
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        document.body.appendChild(labelRenderer.domElement);
+
+        // ----- 轨道控制器 (移动端优化) -----
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+        controls.target.set(0, 0.6, 0);
+        controls.minDistance = 2.5;   // 允许更近
+        controls.maxDistance = 18;
+        controls.maxPolarAngle = Math.PI / 2.1;
+        controls.rotateSpeed = 0.8;   // 触控旋转更跟手
+        controls.zoomSpeed = 0.6;
+        controls.update();
+
+        // ----- 灯光 -----
+        const ambientLight = new THREE.AmbientLight(0x404060, 0.6);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffeedd, 1.8);
+        sunLight.position.set(8, 12, 4);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 1024;
+        sunLight.shadow.mapSize.height = 1024;
+        sunLight.shadow.camera.near = 0.5;
+        sunLight.shadow.camera.far = 30;
+        sunLight.shadow.camera.left = -10;
+        sunLight.shadow.camera.right = 10;
+        sunLight.shadow.camera.top = 10;
+        sunLight.shadow.camera.bottom = -10;
+        scene.add(sunLight);
+
+        const fillLight = new THREE.DirectionalLight(0x88aaff, 0.5);
+        fillLight.position.set(-5, 3, -5);
+        scene.add(fillLight);
+
+        const backLight = new THREE.DirectionalLight(0xffccaa, 0.3);
+        backLight.position.set(-2, 1, -6);
+        scene.add(backLight);
+
+        // ----- 地面 -----
+        const groundGeometry = new THREE.CircleGeometry(12, 64);
+        const groundMaterial = new THREE.MeshStandardMaterial({
+            color: 0x5b8c3e,
+            roughness: 0.9,
+            metalness: 0.0,
+            side: THREE.DoubleSide,
+        });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = -0.01;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        const gridHelper = new THREE.GridHelper(16, 16, 0xffaa66, 0x88aa44);
+        gridHelper.position.y = 0;
+        scene.add(gridHelper);
+
+        // ----- 环境装饰 (树、帐篷、草丛) -----
+        function createTree(x, z, scale = 1) {
+            const group = new THREE.Group();
+            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.8 });
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2 * scale, 0.3 * scale, 1.0 * scale), trunkMat);
+            trunk.position.y = 0.5 * scale;
+            trunk.castShadow = true;
+            group.add(trunk);
+            const leafMat = new THREE.MeshStandardMaterial({ color: 0x3a7d3a, roughness: 0.6 });
+            const crown1 = new THREE.Mesh(new THREE.ConeGeometry(0.8 * scale, 0.8 * scale, 6), leafMat);
+            crown1.position.y = 1.0 * scale + 0.4 * scale;
+            crown1.castShadow = true;
+            group.add(crown1);
+            const crown2 = new THREE.Mesh(new THREE.ConeGeometry(0.6 * scale, 0.6 * scale, 6), leafMat);
+            crown2.position.y = 1.4 * scale + 0.6 * scale;
+            crown2.castShadow = true;
+            group.add(crown2);
+            group.position.set(x, 0, z);
+            return group;
+        }
+        scene.add(createTree(-4.5, 3.5, 0.9));
+        scene.add(createTree(5.0, -3.0, 1.1));
+        scene.add(createTree(-3.8, -4.2, 0.8));
+        scene.add(createTree(4.2, 4.0, 1.0));
+
+        function createTent(x, z) {
+            const group = new THREE.Group();
+            const tentMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.7 });
+            const tentBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.1, 0.9), tentMat);
+            tentBase.position.y = 0.05;
+            tentBase.receiveShadow = true;
+            group.add(tentBase);
+            const tentMat2 = new THREE.MeshStandardMaterial({ color: 0xcc8e5a, roughness: 0.8, side: THREE.DoubleSide });
+            const tentRoof = new THREE.Mesh(new THREE.ConeGeometry(0.9, 0.7, 4), tentMat2);
+            tentRoof.position.y = 0.45;
+            tentRoof.rotation.y = Math.PI / 4;
+            tentRoof.castShadow = true;
+            group.add(tentRoof);
+            group.position.set(x, 0, z);
+            return group;
+        }
+        scene.add(createTent(3.0, -4.5));
+        scene.add(createTent(-3.2, 4.8));
+
+        for (let i = 0; i < 40; i++) {
+            const bladeMat = new THREE.MeshStandardMaterial({ color: 0x4c7a34 });
+            const blade = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.2 + Math.random() * 0.2, 4), bladeMat);
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 2 + Math.random() * 5;
+            blade.position.set(Math.cos(angle) * radius, 0.1, Math.sin(angle) * radius);
+            blade.rotation.y = Math.random() * Math.PI;
+            blade.castShadow = true;
+            scene.add(blade);
+        }
+
+        // ----- 烧烤炉 (主体) -----
+        const grillGroup = new THREE.Group();
+        const baseMat = new THREE.MeshStandardMaterial({ color: 0x8b3a3a, roughness: 0.9 });
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.8, 0.2), baseMat);
+        base.position.y = 0.1;
+        base.receiveShadow = true;
+        base.castShadow = true;
+        grillGroup.add(base);
+
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.7, metalness: 0.3 });
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.7, 0.4), bodyMat);
+        body.position.y = 0.3;
+        body.castShadow = true;
+        grillGroup.add(body);
+
+        const fireMat = new THREE.MeshStandardMaterial({ color: 0xff5500, emissive: 0xff2200, emissiveIntensity: 0.5 });
+        for (let i = 0; i < 12; i++) {
+            const coal = new THREE.Mesh(new THREE.SphereGeometry(0.06 + Math.random() * 0.07, 6), fireMat);
+            const angle = Math.random() * Math.PI * 2;
+            const rad = Math.random() * 0.4;
+            coal.position.set(Math.cos(angle) * rad, 0.5 + Math.random() * 0.05, Math.sin(angle) * rad);
+            coal.castShadow = false;
+            grillGroup.add(coal);
+        }
+
+        const rackMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.6, roughness: 0.4 });
+        for (let i = -3; i <= 3; i++) {
+            const bar = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.02, 0.7), rackMat);
+            bar.position.set(i * 0.12, 0.55, 0);
+            bar.castShadow = true;
+            grillGroup.add(bar);
+        }
+        for (let i = -3; i <= 3; i++) {
+            const bar = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.02, 0.04), rackMat);
+            bar.position.set(0, 0.55, i * 0.12);
+            bar.castShadow = true;
+            grillGroup.add(bar);
+        }
+
+        const stickMat = new THREE.MeshStandardMaterial({ color: 0xccaa88 });
+        const foodMat = new THREE.MeshStandardMaterial({ color: 0xcc6633, roughness: 0.8 });
+        for (let i = 0; i < 3; i++) {
+            const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.5), stickMat);
+            stick.rotation.z = Math.PI / 2;
+            stick.position.set(-0.25 + i * 0.25, 0.6, 0.15);
+            stick.castShadow = true;
+            grillGroup.add(stick);
+            const food = new THREE.Mesh(new THREE.SphereGeometry(0.08, 6), foodMat);
+            food.position.set(-0.25 + i * 0.25, 0.6, 0.15);
+            food.castShadow = true;
+            grillGroup.add(food);
+        }
+        grillGroup.position.set(0, 0, 0);
+        scene.add(grillGroup);
+
+        const centerGlow = new THREE.Mesh(
+            new THREE.SphereGeometry(0.1, 8),
+            new THREE.MeshBasicMaterial({ color: 0xffaa00 })
+        );
+        centerGlow.position.set(0, 0.7, 0);
+        scene.add(centerGlow);
+
+        // ----- 四个机位 (加大尺寸适应移动端) -----
+        const camHeight = 1.2;
+        const colors = {
+            A: 0xff4d4d,
+            B: 0x4dff4d,
+            C: 0x4d4dff,
+            D: 0xffdd4d
+        };
+        const positions = {
+            A: { x: 0, z: 4.0, label: 'A · 全景', sub: '前方 4m' },
+            B: { x: -3.2, z: 0, label: 'B · 中景', sub: '左侧 3.2m' },
+            C: { x: 2.8, z: 0, label: 'C · 近景', sub: '右侧 2.8m' },
+            D: { x: 0, z: -3.6, label: 'D · 逆光', sub: '后方 3.6m' }
+        };
+
+        for (const [key, pos] of Object.entries(positions)) {
+            const color = colors[key];
+            const x = pos.x;
+            const z = pos.z;
+            const y = camHeight;
+
+            // 底座圆盘 (加大)
+            const diskMat = new THREE.MeshStandardMaterial({ color: color, transparent: true, opacity: 0.3, roughness: 0.5,
+                side: THREE.DoubleSide });
+            const disk = new THREE.Mesh(new THREE.CircleGeometry(0.45, 20), diskMat);
+            disk.rotation.x = -Math.PI / 2;
+            disk.position.set(x, 0.01, z);
+            disk.receiveShadow = true;
+            scene.add(disk);
+
+            // 支柱 (加粗)
+            const poleMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.4 });
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, y), poleMat);
+            pole.position.set(x, y / 2, z);
+            pole.castShadow = true;
+            scene.add(pole);
+
+            // 相机模型 (加大)
+            const camGroup = new THREE.Group();
+            const bodyCam = new THREE.Mesh(
+                new THREE.BoxGeometry(0.4, 0.22, 0.25),
+                new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.3, metalness: 0.4 })
+            );
+            bodyCam.position.set(0, 0, 0);
+            camGroup.add(bodyCam);
+            const lens = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.1, 0.1, 0.15, 8),
+                new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.2, metalness: 0.6 })
+            );
+            lens.rotation.x = Math.PI / 2;
+            lens.position.set(0, 0, 0.2);
+            camGroup.add(lens);
+            const view = new THREE.Mesh(
+                new THREE.BoxGeometry(0.1, 0.05, 0.03),
+                new THREE.MeshStandardMaterial({ color: 0x88aaff, emissive: 0x224466, emissiveIntensity: 0.2 })
+            );
+            view.position.set(0, 0.1, -0.1);
+            camGroup.add(view);
+
+            const angleToOrigin = Math.atan2(-x, -z);
+            camGroup.rotation.y = angleToOrigin;
+            camGroup.position.set(x, y, z);
+            scene.add(camGroup);
+
+            // 彩色光环 (加大)
+            const ringMat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.35, side: THREE
+                    .DoubleSide });
+            const ring = new THREE.Mesh(new THREE.RingGeometry(0.32, 0.42, 28), ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.set(x, 0.05, z);
+            scene.add(ring);
+
+            // CSS2D 标签
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'label-cam';
+            labelDiv.textContent = pos.label;
+            const labelObj = new CSS2DObject(labelDiv);
+            labelObj.position.set(x, y + 0.7, z);
+            scene.add(labelObj);
+
+            // 距离标签
+            const distDiv = document.createElement('div');
+            distDiv.className = 'label-dist';
+            const dist = Math.sqrt(x * x + z * z).toFixed(1);
+            distDiv.textContent = `📏 ${dist}m`;
+            const distLabel = new CSS2DObject(distDiv);
+            const midX = x * 0.45;
+            const midZ = z * 0.45;
+            distLabel.position.set(midX, 1.0, midZ);
+            scene.add(distLabel);
+
+            // 虚线 + 箭头 (加粗)
+            const points = [
+                new THREE.Vector3(x, 0.1, z),
+                new THREE.Vector3(0, 0.1, 0)
+            ];
+            const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+            const lineMat = new THREE.LineDashedMaterial({
+                color: color,
+                dashSize: 0.12,
+                gapSize: 0.1,
+                transparent: true,
+                opacity: 0.7
+            });
+            const line = new THREE.Line(lineGeo, lineMat);
+            line.computeLineDistances();
+            scene.add(line);
+
+            // 箭头加大
+            const arrowDir = new THREE.ArrowHelper(
+                new THREE.Vector3(-x, 0, -z).normalize(),
+                new THREE.Vector3(x, 0.1, z),
+                0.7,
+                color,
+                0.3,
+                0.2
+            );
+            scene.add(arrowDir);
+        }
+
+        // 中心烧烤标签
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'label-title';
+        titleDiv.textContent = '🔥 烧烤炉';
+        const titleLabel = new CSS2DObject(titleDiv);
+        titleLabel.position.set(0, 1.4, 0);
+        scene.add(titleLabel);
+
+        // 北方向指示
+        const northDiv = document.createElement('div');
+        northDiv.textContent = '⬆ 北';
+        northDiv.style.color = '#fff';
+        northDiv.style.fontSize = 'clamp(14px, 3vw, 20px)';
+        northDiv.style.fontWeight = 'bold';
+        northDiv.style.textShadow = '0 0 15px rgba(0,0,0,0.9)';
+        northDiv.style.background = 'rgba(0,0,0,0.3)';
+        northDiv.style.padding = '2px 12px';
+        northDiv.style.borderRadius = '20px';
+        northDiv.style.backdropFilter = 'blur(2px)';
+        const northLabel = new CSS2DObject(northDiv);
+        northLabel.position.set(0, 0.1, 5.5);
+        scene.add(northLabel);
+
+        // ----- 窗口自适应 (移动端防误触) -----
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ----- 动画循环 -----
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
