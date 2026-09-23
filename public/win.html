@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>5.5m 外墙开窗方案 · 立面示意</title>
+<title>5.5m 正室 + 2.9m 玄关 · 开窗方案对比</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -18,16 +18,15 @@
   .sub { text-align: center; color: #8b8b8b; font-size: 13px; margin-bottom: 34px; }
   .grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 26px;
+    grid-template-columns: 1fr;
+    gap: 30px;
     max-width: 1240px;
     margin: 0 auto;
   }
-  @media (max-width: 920px) { .grid { grid-template-columns: 1fr; } }
   .card {
     background: #fff;
     border-radius: 16px;
-    padding: 20px 20px 12px;
+    padding: 22px 26px 16px;
     box-shadow: 0 3px 18px rgba(0,0,0,.07);
     border: 1px solid #eae5dd;
   }
@@ -46,10 +45,10 @@
     border-radius: 20px;
     letter-spacing: .3px;
   }
-  .badge.alt { background: #f0f0f0; color: #888; }
   .badge.gold { background: #fdf1dc; color: #a4762a; }
-  .desc { font-size: 12px; color: #999; margin: 0 0 10px; }
-  svg { width: 100%; height: auto; display: block; }
+  .badge.blue { background: #e8f0f8; color: #3a6b9c; }
+  .desc { font-size: 12px; color: #999; margin: 0 0 14px; }
+  svg { width: 100%; max-width: 960px; height: auto; display: block; margin: 0 auto; }
   .note {
     max-width: 1240px;
     margin: 30px auto 0;
@@ -66,40 +65,46 @@
   .note li { margin-bottom: 8px; }
   .note b { color: #2f7d4f; }
   .note .hl { background: #fdf6e9; padding: 1px 5px; border-radius: 4px; color: #a4762a; font-weight: 600; }
+  .note .hl2 { background: #e8f0f8; padding: 1px 5px; border-radius: 4px; color: #3a6b9c; font-weight: 600; }
 </style>
 </head>
 <body>
 
-<h1>5.5m 外墙 · 开窗方案对比</h1>
-<p class="sub">层高 3.4m ｜ 左侧 1.8m 双层货架（底部净高 2.0m）｜ 下为音乐工作区 ｜ 窗洞 900 × 1200</p>
+<h1>5.5m 正室 + 2.9m 玄关 · 开窗方案对比</h1>
+<p class="sub">外墙总宽 8.4m ｜ 层高 3.4m ｜ 左侧 1.8m 双层货架（底部净高 2.0m）｜ 窗洞 900 × 1200 ｜ 窗台 750 / 窗顶 1950</p>
 
 <div class="grid">
 
-    <!-- ============ 方案 A ============ -->
+  <!-- =============================================================== -->
+  <!-- 方案 A：工作区不开窗，窗 2 距玄关 600（推荐）                    -->
+  <!-- =============================================================== -->
   <section class="card">
-    <h2>方案 A · 工作区不开窗，两扇窗全部放在开放区 <span class="badge gold">声学优先 · 推荐</span></h2>
-    <p class="desc">音乐工作区保持完整实墙（利于监听与录音）｜窗 1 与工作区间隔 100mm，窗 2 按“剩余墙面居中”计算得出</p>
+    <h2>方案 A · 工作区不开窗，窗 2 距玄关 600 <span class="badge gold">声学优先 · 推荐</span></h2>
+    <p class="desc">音乐工作区保持完整实墙（利于监听与录音）｜窗 1 与工作区间隔 100mm ｜窗 2 距玄关 600mm，两窗间距 1200mm，整体节奏均衡</p>
 
-    <svg viewBox="0 0 760 545" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 1080 580" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="skyC" x1="0" y1="0" x2="0.25" y2="1">
+        <linearGradient id="skyA" x1="0" y1="0" x2="0.25" y2="1">
           <stop offset="0%" stop-color="#c5e4f7"/>
           <stop offset="100%" stop-color="#eff8fd"/>
         </linearGradient>
-        <linearGradient id="bedC" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="bedA" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#dccbb2" stop-opacity="0.95"/>
           <stop offset="100%" stop-color="#efe6d8" stop-opacity="0.55"/>
         </linearGradient>
       </defs>
 
-      <!-- 墙体 -->
+      <!-- 玄关墙（弱化色） -->
+      <rect x="650" y="60" width="290" height="340" fill="#ece7e0" stroke="#ddd6cb" stroke-width="1.5"/>
+
+      <!-- 正室墙 -->
       <rect x="100" y="60" width="550" height="340" fill="#faf8f5" stroke="#ddd6cb" stroke-width="1.5"/>
 
-      <!-- 工作区底色（实墙） -->
+      <!-- 工作区底色 -->
       <rect x="100" y="200" width="180" height="200" fill="#f2eee7"/>
 
       <!-- 双层货架 -->
-      <rect x="100" y="60" width="180" height="140" fill="url(#bedC)" stroke="#c4ac8c" stroke-width="1.5" stroke-dasharray="8 5" rx="2"/>
+      <rect x="100" y="60" width="180" height="140" fill="url(#bedA)" stroke="#c4ac8c" stroke-width="1.5" stroke-dasharray="8 5" rx="2"/>
       <rect x="100" y="192" width="180" height="8" fill="#c4ac8c"/>
       <text x="190" y="112" text-anchor="middle" font-size="13" font-weight="600" fill="#7a6349">双层货架 · 第二层</text>
       <text x="190" y="132" text-anchor="middle" font-size="11" fill="#a08e78">平台标高 +2.000</text>
@@ -109,20 +114,27 @@
       <text x="190" y="312" text-anchor="middle" font-size="10" fill="#c4b6a4">（实墙 · 无窗）</text>
       <text x="190" y="332" text-anchor="middle" font-size="9" fill="#c4b6a4">声学优先</text>
 
-      <!-- 窗 1：与工作区间隔 100mm，即 1900~2800mm -->
-      <rect x="290" y="205" width="90" height="120" fill="url(#skyC)" stroke="#a8b2ba" stroke-width="4"/>
+      <!-- 分界线 -->
+      <line x1="650" y1="60" x2="650" y2="400" stroke="#c4bdb3" stroke-width="1.5" stroke-dasharray="6 4"/>
+
+      <!-- 玄关标签 -->
+      <text x="795" y="226" text-anchor="middle" font-size="14" fill="#b8ae9e">玄关</text>
+      <text x="795" y="246" text-anchor="middle" font-size="11" fill="#c8bdac">2900</text>
+
+      <!-- 窗 1：1900~2800mm (x=290~380) -->
+      <rect x="290" y="205" width="90" height="120" fill="url(#skyA)" stroke="#a8b2ba" stroke-width="4"/>
       <line x1="335" y1="205" x2="335" y2="325" stroke="#a8b2ba" stroke-width="2.5"/>
       <text x="335" y="348" text-anchor="middle" font-size="11" fill="#6f8ba3">窗 1</text>
       <text x="335" y="362" text-anchor="middle" font-size="9" fill="#93a9ba">中心 2350</text>
 
-      <!-- 窗 2：3700~4600mm -->
-      <rect x="470" y="205" width="90" height="120" fill="url(#skyC)" stroke="#a8b2ba" stroke-width="4"/>
-      <line x1="515" y1="205" x2="515" y2="325" stroke="#a8b2ba" stroke-width="2.5"/>
-      <text x="515" y="348" text-anchor="middle" font-size="11" fill="#6f8ba3">窗 2</text>
-      <text x="515" y="362" text-anchor="middle" font-size="9" fill="#93a9ba">中心 4150</text>
+      <!-- 窗 2：4000~4900mm，距玄关 600 (x=500~590) -->
+      <rect x="500" y="205" width="90" height="120" fill="url(#skyA)" stroke="#a8b2ba" stroke-width="4"/>
+      <line x1="545" y1="205" x2="545" y2="325" stroke="#a8b2ba" stroke-width="2.5"/>
+      <text x="545" y="348" text-anchor="middle" font-size="11" fill="#6f8ba3">窗 2</text>
+      <text x="545" y="362" text-anchor="middle" font-size="9" fill="#93a9ba">中心 4450</text>
 
       <!-- 地面 -->
-      <rect x="50" y="400" width="670" height="3" fill="#b9b0a4"/>
+      <rect x="50" y="400" width="960" height="3" fill="#b9b0a4"/>
 
       <!-- 左侧尺寸：层高 -->
       <line x1="72" y1="400" x2="72" y2="60" stroke="#c2c2c2" stroke-width="1"/>
@@ -137,125 +149,154 @@
       <text x="30" y="305" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 30 305)">2000</text>
 
       <!-- 右侧尺寸：窗高 / 窗台高 -->
-      <line x1="692" y1="205" x2="692" y2="400" stroke="#c2c2c2" stroke-width="1"/>
-      <line x1="686" y1="205" x2="698" y2="205" stroke="#c2c2c2" stroke-width="1"/>
-      <line x1="686" y1="325" x2="698" y2="325" stroke="#c2c2c2" stroke-width="1"/>
-      <line x1="686" y1="400" x2="698" y2="400" stroke="#c2c2c2" stroke-width="1"/>
-      <text x="710" y="265" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 710 265)">1200</text>
-      <text x="710" y="366" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 710 366)">750</text>
+      <line x1="590" y1="205" x2="1000" y2="205" stroke="#e0dcd6" stroke-width="0.8"/>
+      <line x1="590" y1="325" x2="1000" y2="325" stroke="#e0dcd6" stroke-width="0.8"/>
+      <line x1="590" y1="400" x2="1000" y2="400" stroke="#e0dcd6" stroke-width="0.8"/>
+      <line x1="980" y1="205" x2="980" y2="400" stroke="#c2c2c2" stroke-width="1"/>
+      <line x1="974" y1="205" x2="986" y2="205" stroke="#c2c2c2" stroke-width="1"/>
+      <line x1="974" y1="325" x2="986" y2="325" stroke="#c2c2c2" stroke-width="1"/>
+      <line x1="974" y1="400" x2="986" y2="400" stroke="#c2c2c2" stroke-width="1"/>
+      <text x="998" y="265" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 998 265)">1200</text>
+      <text x="998" y="366" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 998 366)">750</text>
 
-      <!-- 双层货架宽度 -->
-      <line x1="100" y1="428" x2="280" y2="428" stroke="#d0b48a" stroke-width="1"/>
-      <line x1="100" y1="422" x2="100" y2="434" stroke="#d0b48a" stroke-width="1"/>
-      <line x1="280" y1="422" x2="280" y2="434" stroke="#d0b48a" stroke-width="1"/>
-      <text x="190" y="420" text-anchor="middle" font-size="10" fill="#a08050">双层货架宽 1800</text>
+      <!-- 底部连续尺寸链 -->
+      <line x1="100" y1="460" x2="940" y2="460" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="100" y1="454" x2="100" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="280" y1="454" x2="280" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="290" y1="454" x2="290" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="380" y1="454" x2="380" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="500" y1="454" x2="500" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="590" y1="454" x2="590" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="650" y1="454" x2="650" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="940" y1="454" x2="940" y2="466" stroke="#d4d4d4" stroke-width="1"/>
 
-      <!-- 底部尺寸链 -->
-      <line x1="100" y1="468" x2="650" y2="468" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="100" y1="462" x2="100" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="280" y1="462" x2="280" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="290" y1="462" x2="290" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="380" y1="462" x2="380" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="470" y1="462" x2="470" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="560" y1="462" x2="560" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="650" y1="462" x2="650" y2="474" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="290" y1="460" x2="380" y2="460" stroke="#7fa8c9" stroke-width="3"/>
+      <line x1="500" y1="460" x2="590" y2="460" stroke="#7fa8c9" stroke-width="3"/>
 
-      <line x1="290" y1="468" x2="380" y2="468" stroke="#7fa8c9" stroke-width="3"/>
-      <line x1="470" y1="468" x2="560" y2="468" stroke="#7fa8c9" stroke-width="3"/>
-
-      <text x="190" y="460" text-anchor="middle" font-size="10" fill="#9a9a9a">1800</text>
-      <text x="285" y="460" text-anchor="middle" font-size="10" fill="#9a9a9a">100</text>
-      <text x="335" y="460" text-anchor="middle" font-size="10" fill="#5b87ab">900</text>
-      <text x="425" y="460" text-anchor="middle" font-size="10" fill="#9a9a9a">900</text>
-      <text x="515" y="460" text-anchor="middle" font-size="10" fill="#5b87ab">900</text>
-      <text x="605" y="460" text-anchor="middle" font-size="10" fill="#9a9a9a">900</text>
+      <text x="190" y="452" text-anchor="middle" font-size="10" fill="#9a9a9a">1800</text>
+      <text x="285" y="452" text-anchor="middle" font-size="8" fill="#9a9a9a">100</text>
+      <text x="335" y="452" text-anchor="middle" font-size="10" fill="#5b87ab">900</text>
+      <text x="440" y="452" text-anchor="middle" font-size="10" fill="#9a9a9a">1200</text>
+      <text x="545" y="452" text-anchor="middle" font-size="10" fill="#5b87ab">900</text>
+      <text x="620" y="452" text-anchor="middle" font-size="10" fill="#9a9a9a">600</text>
+      <text x="795" y="452" text-anchor="middle" font-size="10" fill="#b8ae9e">2900（玄关）</text>
 
       <!-- 总尺寸 -->
-      <line x1="100" y1="508" x2="650" y2="508" stroke="#b5b5b5" stroke-width="1"/>
-      <line x1="100" y1="502" x2="100" y2="514" stroke="#b5b5b5" stroke-width="1"/>
-      <line x1="650" y1="502" x2="650" y2="514" stroke="#b5b5b5" stroke-width="1"/>
-      <text x="375" y="528" text-anchor="middle" font-size="12" fill="#8f8f8f">5500</text>
+      <line x1="100" y1="520" x2="940" y2="520" stroke="#b5b5b5" stroke-width="1"/>
+      <line x1="100" y1="514" x2="100" y2="526" stroke="#b5b5b5" stroke-width="1"/>
+      <line x1="940" y1="514" x2="940" y2="526" stroke="#b5b5b5" stroke-width="1"/>
+      <text x="520" y="540" text-anchor="middle" font-size="12" fill="#8f8f8f">外墙总宽 8400（正室 5500 + 玄关 2900）</text>
     </svg>
   </section>
 
-  <!-- ============ 方案 B ============ -->
+  <!-- =============================================================== -->
+  <!-- 方案 B：整墙开放，两扇窗均匀分布                                -->
+  <!-- =============================================================== -->
   <section class="card">
-    <h2>方案 B · 两扇窗（工作区居中开，剩余空间局中开） <span class="badge alt">采光好</span></h2>
-    <p class="desc">工作区一扇 + 开放区一扇，采光均匀，但工作区直接开窗，声学偏弱</p>
+    <h2>方案 B · 不考虑室内功能 <span class="badge blue">视觉优先 · 备选</span></h2>
+    <p class="desc">将 5.5m 正室墙视为完整开放墙面，两扇 900mm 窗均匀分布，形成 1230 ｜ 900 ｜ 1240 ｜ 900 ｜ 1230 的均质节奏</p>
 
-    <svg viewBox="0 0 760 545" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 1080 580" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="skyA" x1="0" y1="0" x2="0.25" y2="1">
+        <linearGradient id="skyB" x1="0" y1="0" x2="0.25" y2="1">
           <stop offset="0%" stop-color="#c5e4f7"/>
           <stop offset="100%" stop-color="#eff8fd"/>
         </linearGradient>
-        <linearGradient id="bedA" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id="bedB" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#dccbb2" stop-opacity="0.95"/>
           <stop offset="100%" stop-color="#efe6d8" stop-opacity="0.55"/>
         </linearGradient>
       </defs>
 
-      <rect x="100" y="60" width="550" height="340" fill="#faf8f5" stroke="#ddd6cb" stroke-width="1.5"/>
-      <rect x="100" y="200" width="180" height="200" fill="#f3efe8"/>
+      <!-- 玄关墙（弱化色） -->
+      <rect x="650" y="60" width="290" height="340" fill="#ece7e0" stroke="#ddd6cb" stroke-width="1.5"/>
 
-      <rect x="100" y="60" width="180" height="140" fill="url(#bedA)" stroke="#c4ac8c" stroke-width="1.5" stroke-dasharray="8 5" rx="2"/>
+      <!-- 正室墙 -->
+      <rect x="100" y="60" width="550" height="340" fill="#faf8f5" stroke="#ddd6cb" stroke-width="1.5"/>
+
+      <!-- 工作区底色 -->
+      <rect x="100" y="200" width="180" height="200" fill="#f2eee7"/>
+
+      <!-- 双层货架 -->
+      <rect x="100" y="60" width="180" height="140" fill="url(#bedB)" stroke="#c4ac8c" stroke-width="1.5" stroke-dasharray="8 5" rx="2"/>
       <rect x="100" y="192" width="180" height="8" fill="#c4ac8c"/>
       <text x="190" y="112" text-anchor="middle" font-size="13" font-weight="600" fill="#7a6349">双层货架 · 第二层</text>
       <text x="190" y="132" text-anchor="middle" font-size="11" fill="#a08e78">平台标高 +2.000</text>
 
-      <text x="190" y="378" text-anchor="middle" font-size="12" fill="#9c8b76">音乐工作区</text>
+      <!-- 工作区文字（仅视觉展示） -->
+      <text x="190" y="292" text-anchor="middle" font-size="12" fill="#c4b6a4">音乐工作区</text>
+      <text x="190" y="312" text-anchor="middle" font-size="10" fill="#d0c4b4">（视觉展示 · 开窗不参考）</text>
 
-      <rect x="145" y="205" width="90" height="120" fill="url(#skyA)" stroke="#a8b2ba" stroke-width="4"/>
-      <line x1="190" y1="205" x2="190" y2="325" stroke="#a8b2ba" stroke-width="2.5"/>
-      <text x="190" y="348" text-anchor="middle" font-size="11" fill="#6f8ba3">窗 1</text>
+      <!-- 分界线 -->
+      <line x1="650" y1="60" x2="650" y2="400" stroke="#c4bdb3" stroke-width="1.5" stroke-dasharray="6 4"/>
 
-      <rect x="420" y="205" width="90" height="120" fill="url(#skyA)" stroke="#a8b2ba" stroke-width="4"/>
-      <line x1="465" y1="205" x2="465" y2="325" stroke="#a8b2ba" stroke-width="2.5"/>
-      <text x="465" y="348" text-anchor="middle" font-size="11" fill="#6f8ba3">窗 2</text>
+      <!-- 玄关标签 -->
+      <text x="795" y="226" text-anchor="middle" font-size="14" fill="#b8ae9e">玄关</text>
+      <text x="795" y="246" text-anchor="middle" font-size="11" fill="#c8bdac">2900</text>
 
-      <rect x="50" y="400" width="670" height="3" fill="#b9b0a4"/>
+      <!-- 窗 1：1230~2130mm (x=223~313) -->
+      <rect x="223" y="205" width="90" height="120" fill="url(#skyB)" stroke="#a8b2ba" stroke-width="4"/>
+      <line x1="268" y1="205" x2="268" y2="325" stroke="#a8b2ba" stroke-width="2.5"/>
+      <text x="268" y="348" text-anchor="middle" font-size="11" fill="#6f8ba3">窗 1</text>
+      <text x="268" y="362" text-anchor="middle" font-size="9" fill="#93a9ba">中心 1680</text>
 
+      <!-- 窗 2：3370~4270mm (x=437~527) -->
+      <rect x="437" y="205" width="90" height="120" fill="url(#skyB)" stroke="#a8b2ba" stroke-width="4"/>
+      <line x1="482" y1="205" x2="482" y2="325" stroke="#a8b2ba" stroke-width="2.5"/>
+      <text x="482" y="348" text-anchor="middle" font-size="11" fill="#6f8ba3">窗 2</text>
+      <text x="482" y="362" text-anchor="middle" font-size="9" fill="#93a9ba">中心 3820</text>
+
+      <!-- 地面 -->
+      <rect x="50" y="400" width="960" height="3" fill="#b9b0a4"/>
+
+      <!-- 左侧尺寸：层高 -->
       <line x1="72" y1="400" x2="72" y2="60" stroke="#c2c2c2" stroke-width="1"/>
       <line x1="66" y1="400" x2="78" y2="400" stroke="#c2c2c2" stroke-width="1"/>
       <line x1="66" y1="60"  x2="78" y2="60"  stroke="#c2c2c2" stroke-width="1"/>
       <text x="60" y="235" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 60 235)">3400</text>
 
+      <!-- 左侧尺寸：底净高 -->
       <line x1="42" y1="400" x2="42" y2="200" stroke="#c2c2c2" stroke-width="1"/>
       <line x1="36" y1="400" x2="48" y2="400" stroke="#c2c2c2" stroke-width="1"/>
       <line x1="36" y1="200" x2="48" y2="200" stroke="#c2c2c2" stroke-width="1"/>
       <text x="30" y="305" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 30 305)">2000</text>
 
-      <line x1="692" y1="205" x2="692" y2="400" stroke="#c2c2c2" stroke-width="1"/>
-      <line x1="686" y1="205" x2="698" y2="205" stroke="#c2c2c2" stroke-width="1"/>
-      <line x1="686" y1="325" x2="698" y2="325" stroke="#c2c2c2" stroke-width="1"/>
-      <line x1="686" y1="400" x2="698" y2="400" stroke="#c2c2c2" stroke-width="1"/>
-      <text x="710" y="265" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 710 265)">1200</text>
-      <text x="710" y="366" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 710 366)">750</text>
+      <!-- 右侧尺寸：窗高 / 窗台高 -->
+      <line x1="527" y1="205" x2="1000" y2="205" stroke="#e0dcd6" stroke-width="0.8"/>
+      <line x1="527" y1="325" x2="1000" y2="325" stroke="#e0dcd6" stroke-width="0.8"/>
+      <line x1="527" y1="400" x2="1000" y2="400" stroke="#e0dcd6" stroke-width="0.8"/>
+      <line x1="980" y1="205" x2="980" y2="400" stroke="#c2c2c2" stroke-width="1"/>
+      <line x1="974" y1="205" x2="986" y2="205" stroke="#c2c2c2" stroke-width="1"/>
+      <line x1="974" y1="325" x2="986" y2="325" stroke="#c2c2c2" stroke-width="1"/>
+      <line x1="974" y1="400" x2="986" y2="400" stroke="#c2c2c2" stroke-width="1"/>
+      <text x="998" y="265" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 998 265)">1200</text>
+      <text x="998" y="366" text-anchor="middle" font-size="11" fill="#8f8f8f" transform="rotate(-90 998 366)">750</text>
 
-      <line x1="100" y1="428" x2="280" y2="428" stroke="#d0b48a" stroke-width="1"/>
-      <line x1="100" y1="422" x2="100" y2="434" stroke="#d0b48a" stroke-width="1"/>
-      <line x1="280" y1="422" x2="280" y2="434" stroke="#d0b48a" stroke-width="1"/>
-      <text x="190" y="420" text-anchor="middle" font-size="10" fill="#a08050">800</text>
+      <!-- 底部连续尺寸链 -->
+      <line x1="100" y1="460" x2="940" y2="460" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="100" y1="454" x2="100" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="223" y1="454" x2="223" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="313" y1="454" x2="313" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="437" y1="454" x2="437" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="527" y1="454" x2="527" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="650" y1="454" x2="650" y2="466" stroke="#d4d4d4" stroke-width="1"/>
+      <line x1="940" y1="454" x2="940" y2="466" stroke="#d4d4d4" stroke-width="1"/>
 
-      <line x1="100" y1="468" x2="650" y2="468" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="100" y1="462" x2="100" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="145" y1="462" x2="145" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="235" y1="462" x2="235" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="420" y1="462" x2="420" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="510" y1="462" x2="510" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="650" y1="462" x2="650" y2="474" stroke="#d4d4d4" stroke-width="1"/>
-      <line x1="145" y1="468" x2="235" y2="468" stroke="#7fa8c9" stroke-width="3"/>
-      <line x1="420" y1="468" x2="510" y2="468" stroke="#7fa8c9" stroke-width="3"/>
-      <text x="190" y="460" text-anchor="middle" font-size="10" fill="#9a9a9a">450</text>
-      <text x="190" y="486" text-anchor="middle" font-size="10" fill="#5b87ab">900</text>
-      <text x="327" y="486" text-anchor="middle" font-size="10" fill="#9a9a9a">1850</text>
-      <text x="465" y="486" text-anchor="middle" font-size="10" fill="#5b87ab">900</text>
-      <text x="580" y="486" text-anchor="middle" font-size="10" fill="#9a9a9a">1400</text>
+      <line x1="223" y1="460" x2="313" y2="460" stroke="#3a6b9c" stroke-width="3"/>
+      <line x1="437" y1="460" x2="527" y2="460" stroke="#3a6b9c" stroke-width="3"/>
 
-      <line x1="100" y1="508" x2="650" y2="508" stroke="#b5b5b5" stroke-width="1"/>
-      <line x1="100" y1="502" x2="100" y2="514" stroke="#b5b5b5" stroke-width="1"/>
-      <line x1="650" y1="502" x2="650" y2="514" stroke="#b5b5b5" stroke-width="1"/>
-      <text x="375" y="528" text-anchor="middle" font-size="12" fill="#8f8f8f">5500</text>
+      <text x="161" y="452" text-anchor="middle" font-size="10" fill="#9a9a9a">1230</text>
+      <text x="268" y="452" text-anchor="middle" font-size="10" fill="#3a6b9c">900</text>
+      <text x="375" y="452" text-anchor="middle" font-size="10" fill="#9a9a9a">1240</text>
+      <text x="482" y="452" text-anchor="middle" font-size="10" fill="#3a6b9c">900</text>
+      <text x="588" y="452" text-anchor="middle" font-size="10" fill="#9a9a9a">1230</text>
+      <text x="795" y="452" text-anchor="middle" font-size="10" fill="#b8ae9e">2900（玄关）</text>
+
+      <!-- 总尺寸 -->
+      <line x1="100" y1="520" x2="940" y2="520" stroke="#b5b5b5" stroke-width="1"/>
+      <line x1="100" y1="514" x2="100" y2="526" stroke="#b5b5b5" stroke-width="1"/>
+      <line x1="940" y1="514" x2="940" y2="526" stroke="#b5b5b5" stroke-width="1"/>
+      <text x="520" y="540" text-anchor="middle" font-size="12" fill="#8f8f8f">外墙总宽 8400（正室 5500 + 玄关 2900）</text>
     </svg>
   </section>
 
@@ -263,15 +304,14 @@
 
 <!-- ============ 说明 ============ -->
 <div class="note">
-  <h3>方案 A 的计算过程与落地建议</h3>
+  <h3>各方案计算过程与落地建议</h3>
   <ul>
-    <li><b>为什么工作区不开窗：</b>床下 2.0m 净高是天然的小房间，实墙最利于吸音与监听；窗 1 紧贴它右侧，光线仍可斜射进工作区，不至于变成黑房间。</li>
-    <li><b>窗 1 定位：</b>床体右缘在 1800mm，窗 1 与工作区间隔 100mm → <span class="hl">窗 1 = 1900 ~ 2800mm，中心 2350mm</span>。它同时是工作区的“借光口”，也是左侧 1.8m 床区的视觉收尾。</li>
-    <li><b>窗 2 计算：</b>窗 1 右缘 2800mm 到右墙 5500mm，剩余墙面 <b>2700mm</b>；放一扇 900mm 窗并居中 → 两侧各留 (2700−900)/2 = <b>900mm</b> → 窗 2 左缘 = 2800+900 = <span class="hl">3700mm</span>，右缘 <span class="hl">4600mm</span>，中心 <span class="hl">4150mm</span>，距右墙 900mm。</li>
-    <li><b>最终节奏：</b>1800（实）｜100（隙）｜900（窗 1）｜900（实）｜900（窗 2）｜900（实）——窗与窗之间的墙垛、以及窗 2 到右墙的墙垛同为 900mm，与窗宽相等，视觉上形成近乎均质的节奏，5.5m 墙不再空。</li>
-    <li><b>窗台统一 750mm、窗顶 1950mm：</b>窗顶刚好低于 2.0m 架子，既保证架子净空完整，两扇窗上沿又齐平。若外墙有圈梁冲突，可整体下调为 700 / 1900。</li>
-    <li><b>可选微调：</b>如果觉得 100mm 间隙太窄，可改为 150~200mm，窗 2 随之重新居中计算即可，节奏感基本不变。</li>
-    <li><b>加分项：</b>两扇窗同在一面外墙，可形成对流通风；窗 1 建议用双层中空玻璃 + 厚窗帘，进一步保护录音环境。</li>
+    <li><b>关于玄关墙：</b>两个方案右侧均保留 2.9m 玄关墙（弱化暖灰色块），外墙总宽 8.4m，玄关高度与正室一致，仅用于辅助展示整体效果。</li>
+    <li><b>方案 A（工作区不开窗 · 推荐）：</b>床体右缘 1800mm → 窗 1 与工作区间隔 100mm → 窗 1 = <span class="hl">1900~2800mm，中心 2350</span>；窗 2 距玄关 600mm → 窗 2 右缘 = 5500−600 = 4900mm → 窗 2 = <span class="hl">4000~4900mm，中心 4450</span>。正室节奏：<b>1800 ｜ 100 ｜ 900 ｜ 1200 ｜ 900 ｜ 600</b>。两窗间距 1200mm 略大于窗宽，窗 2 距玄关 600mm，整体立面重心居中，节奏均衡。</li>
+    <li><b>方案 B（整墙开放 · 备选）：</b>不考虑工作区对开窗的约束（仍保留工作区视觉展示），5.5m 正室墙视为完整开放墙面。两扇 900mm 窗均匀分布 → 剩余墙面 5500−1800=3700mm，三等分 → 每段 <b>1233.3mm</b>，取整为 <span class="hl2">1230 ｜ 900 ｜ 1240 ｜ 900 ｜ 1230</span>。窗 1 = <span class="hl2">1230~2130mm，中心 1680</span>；窗 2 = <span class="hl2">3370~4270mm，中心 3820</span>。</li>
+    <li><b>窗台统一 750mm、窗顶 1950mm：</b>方案 A 中窗顶刚好低于 2.0m 货架，保证架子净空完整；方案 B 同样保持这一标高，两案窗上沿齐平。若外墙有圈梁冲突，可整体下调为 700 / 1900。</li>
+    <li><b>方案 A 的调整效果：</b>窗 2 从原来的 4100~5000 调整为 4000~4900，距玄关从 500 增至 600，两窗间距从 1300 减至 1200。右侧收尾更从容，两窗关联更紧凑，整体节奏从“左密右疏”变为均衡。</li>
+    <li><b>如何选择：</b>若工作区要录音、监听 → 方案 A；若工作区不再是音乐用途，或整墙就是开放客厅/卧室 → 方案 B 最简洁。</li>
   </ul>
 </div>
 
